@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guitar Fretboard Practice</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 { margin-top: 0; color: #1c1e21; }
+        .challenge { font-size: 1.5rem; margin: 1.5rem 0; font-weight: bold; }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover { background-color: #0056b3; }
+        .feedback { margin-top: 1rem; font-weight: bold; min-height: 1.2em; }
+        .score { margin-top: 1rem; color: #65676b; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Fretboard Practice</h1>
+        <div id="game-ui">
+            <div class="challenge" id="challenge-text">Press Start!</div>
+            <input type="text" id="answer-input" placeholder="e.g. C#, Ab, G" style="display: none;">
+            <button id="action-btn">Start Game</button>
+            <div class="feedback" id="feedback-text"></div>
+            <div class="score" id="score-text"></div>
+        </div>
+    </div>
+
+    <script>
+        const strings = [
+            { name: "E", open: "E" },
+            { name: "A", open: "A" },
+            { name: "D", open: "D" },
+            { name: "G", open: "G" },
+            { name: "B", open: "B" },
+            { name: "e", open: "E" }
+        ];
+        const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+        const noteValues = {
+            "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11
+        };
+
+        function getNoteAt(stringOpen, fret) {
+            const openValue = noteValues[stringOpen];
+            const noteValue = (openValue + fret) % 12;
+            return notes[noteValue];
+        }
+
+        let currentChallenge = null;
+        let score = 0;
+        let totalAttempts = 0;
+        const maxAttempts = 10;
+
+        const challengeEl = document.getElementById('challenge-text');
+        const inputEl = document.getElementById('answer-input');
+        const btnEl = document.getElementById('action-btn');
+        const feedbackEl = document.getElementById('feedback-text');
+        const scoreEl = document.getElementById('score-text');
+
+        function nextChallenge() {
+            if (totalAttempts >= maxAttempts) {
+                endGame();
+                return;
+            }
+            const stringIdx = Math.floor(Math.random() * 6);
+            const fret = Math.floor(Math.random() * 13); // 0 to 12
+            const stringNum = 6 - stringIdx;
+            currentChallenge = {
+                string: stringNum,
+                stringOpen: strings[stringIdx].open,
+                fret: fret,
+                correctNote: getNoteAt(strings[stringIdx].open, fret)
+            };
+            challengeEl.innerText = `String ${currentChallenge.string}, Fret ${currentChallenge.fret}`;
+            inputEl.value = '';
+            inputEl.focus();
+        }
+
+        function checkAnswer() {
+            const userAnswer = inputEl.value.trim().toUpperCase();
+            const correct = currentChallenge.correctNote.toUpperCase();
+            
+            // Basic alias support (e.g. Db for C#)
+            const isCorrect = (userAnswer === correct) || 
+                (correct === "C#" && userAnswer === "DB") ||
+                (correct === "D#" && userAnswer === "EB") ||
+                (correct === "F#" && userAnswer === "GB") ||
+                (correct === "G#" && userAnswer === "AB") ||
+                (correct === "A#" && userAnswer === "BB");
+
+            if (isCorrect) {
+                feedbackEl.innerText = "Correct! ✅";
+                feedbackEl.style.color = "green";
+                score++;
+            } else {
+                feedbackEl.innerText = `Incorrect. It was ${currentChallenge.correctNote}. ❌`;
+                feedbackEl.style.color = "red";
+            }
+            totalAttempts++;
+            scoreEl.innerText = `Score: ${score}/${totalAttempts}`;
+            nextChallenge();
+        }
+
+        function startGame() {
+            score = 0;
+            totalAttempts = 0;
+            scoreEl.innerText = '';
+            feedbackEl.innerText = '';
+            inputEl.style.display = 'block';
+            btnEl.innerText = 'Submit';
+            nextChallenge();
+        }
+
+        function endGame() {
+            challengeEl.innerText = "Game Over!";
+            inputEl.style.display = 'none';
+            btnEl.innerText = 'Play Again';
+            feedbackEl.innerText = `Final Score: ${score}/${maxAttempts}`;
+        }
+
+        btnEl.addEventListener('click', () => {
+            if (btnEl.innerText === 'Start Game' || btnEl.innerText === 'Play Again') {
+                startGame();
+            } else {
+                checkAnswer();
+            }
+        });
+
+        inputEl.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkAnswer();
+        });
+    </script>
+</body>
+</html>
