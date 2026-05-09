@@ -5,12 +5,12 @@ export const NOTE_VALUES = {
 };
 
 export const STRINGS = [
-    { name: "E", open: "E" },
-    { name: "A", open: "A" },
-    { name: "D", open: "D" },
-    { name: "G", open: "G" },
+    { name: "e", open: "E" },
     { name: "B", open: "B" },
-    { name: "e", open: "E" }
+    { name: "G", open: "G" },
+    { name: "D", open: "D" },
+    { name: "A", open: "A" },
+    { name: "E", open: "E" }
 ];
 
 export function getNoteAt(stringOpen, fret) {
