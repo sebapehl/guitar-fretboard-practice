@@ -1,0 +1,12 @@
+{
+  "name": "guitar-fretboard-practice",
+  "version": "1.0.0",
+  "description": "Gamified guitar fretboard practice app.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^1.6.1"
+  }
+}

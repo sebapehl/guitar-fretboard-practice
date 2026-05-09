@@ -3,168 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guitar Fretboard Practice</title>
+    <title>Fretboard Mastery</title>
     <style>
+        :root {
+            --primary: #007bff;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #212529;
+            --text-muted: #6c757d;
+        }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            background-color: #f0f2f5;
+            padding: 20px;
         }
-        .card {
-            background: white;
+        .container {
+            background: var(--card-bg);
             padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            max-width: 900px;
+            width: 100%;
             text-align: center;
-            max-width: 400px;
-            width: 100%;
         }
-        h1 { margin-top: 0; color: #1c1e21; }
-        .challenge { font-size: 1.5rem; margin: 1.5rem 0; font-weight: bold; }
-        input {
+        h1 { margin-top: 0; font-weight: 800; letter-spacing: -0.5px; }
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .timer { font-size: 1.5rem; color: var(--text); }
+        
+        .challenge-display {
+            background: #f1f3f5;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 2rem;
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #fretboard-ui {
+            margin: 20px 0;
+            overflow-x: auto;
             width: 100%;
-            padding: 0.5rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .note-buttons {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .note-btn {
+            background: white;
+            border: 2px solid #dee2e6;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+        .note-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .note-btn:active { transform: scale(0.95); }
+
+        .feedback {
+            height: 2rem;
+            margin-top: 1rem;
+            font-weight: bold;
             font-size: 1.2rem;
-            margin-bottom: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
         }
-        button {
-            background-color: #007bff;
+
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .btn {
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            border-radius: 4px;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-weight: 600;
             cursor: pointer;
-            width: 100%;
+            font-size: 1rem;
         }
-        button:hover { background-color: #0056b3; }
-        .feedback { margin-top: 1rem; font-weight: bold; min-height: 1.2em; }
-        .score { margin-top: 1rem; color: #65676b; }
+        .btn-secondary { background: #6c757d; }
+
+        /* Settings View */
+        #settings-view {
+            display: none;
+            text-align: left;
+        }
+        .setting-group { margin-bottom: 1.5rem; }
+        .setting-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        
+        /* Leaderboard */
+        .pb-display {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Fretboard Practice</h1>
-        <div id="game-ui">
-            <div class="challenge" id="challenge-text">Press Start!</div>
-            <input type="text" id="answer-input" placeholder="e.g. C#, Ab, G" style="display: none;">
-            <button id="action-btn">Start Game</button>
+    <div class="container">
+        <div id="game-view">
+            <div class="stats-bar">
+                <div id="round-indicator">Round 0/10</div>
+                <div class="timer" id="timer-display">00.00s</div>
+                <div id="score-indicator">Score: 0</div>
+            </div>
+
+            <div class="challenge-display" id="challenge-text">
+                Ready?
+            </div>
+
+            <div id="fretboard-ui"></div>
+
+            <div class="note-buttons" id="note-input" style="display: none;">
+                <!-- Buttons injected by JS -->
+            </div>
+
             <div class="feedback" id="feedback-text"></div>
-            <div class="score" id="score-text"></div>
+
+            <div class="controls">
+                <button class="btn" id="start-btn">Start 10-Note Sprint</button>
+                <button class="btn btn-secondary" id="to-settings-btn">Settings</button>
+            </div>
+
+            <div class="pb-display" id="pb-text"></div>
+        </div>
+
+        <div id="settings-view">
+            <h2>Settings</h2>
+            <div class="setting-group">
+                <label>Mode</label>
+                <select id="setting-mode">
+                    <option value="identify">Identify Note (Physical ➔ Name)</option>
+                    <option value="locate">Locate Fret (Name ➔ Physical)</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Fret Range: <span id="fret-range-val">0 - 12</span></label>
+                <input type="range" id="setting-fret-max" min="1" max="22" value="12">
+            </div>
+            <div class="controls">
+                <button class="btn" id="save-settings-btn">Save & Back</button>
+            </div>
         </div>
     </div>
 
-    <script>
-        const strings = [
-            { name: "E", open: "E" },
-            { name: "A", open: "A" },
-            { name: "D", open: "D" },
-            { name: "G", open: "G" },
-            { name: "B", open: "B" },
-            { name: "e", open: "E" }
-        ];
-        const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-        const noteValues = {
-            "C": 0, "C#": 1, "Db": 1, "D": 2, "D#": 3, "Eb": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "G": 7, "G#": 8, "Ab": 8, "A": 9, "A#": 10, "Bb": 10, "B": 11
-        };
+    <script type="module">
+        import { GameState, NOTES } from './fretboard.js';
+        import { FretboardUI } from './ui.js';
 
-        function getNoteAt(stringOpen, fret) {
-            const openValue = noteValues[stringOpen];
-            const noteValue = (openValue + fret) % 12;
-            return notes[noteValue];
-        }
+        const state = new GameState();
+        let ui;
+        let timerInterval;
 
-        let currentChallenge = null;
-        let score = 0;
-        let totalAttempts = 0;
-        const maxAttempts = 10;
-
+        // DOM Elements
+        const gameView = document.getElementById('game-view');
+        const settingsView = document.getElementById('settings-view');
         const challengeEl = document.getElementById('challenge-text');
-        const inputEl = document.getElementById('answer-input');
-        const btnEl = document.getElementById('action-btn');
+        const noteInputEl = document.getElementById('note-input');
         const feedbackEl = document.getElementById('feedback-text');
-        const scoreEl = document.getElementById('score-text');
+        const timerEl = document.getElementById('timer-display');
+        const roundEl = document.getElementById('round-indicator');
+        const scoreEl = document.getElementById('score-indicator');
+        const startBtn = document.getElementById('start-btn');
+        const pbEl = document.getElementById('pb-text');
 
-        function nextChallenge() {
-            if (totalAttempts >= maxAttempts) {
-                endGame();
-                return;
-            }
-            const stringIdx = Math.floor(Math.random() * 6);
-            const fret = Math.floor(Math.random() * 13); // 0 to 12
-            const stringNum = 6 - stringIdx;
-            currentChallenge = {
-                string: stringNum,
-                stringOpen: strings[stringIdx].open,
-                fret: fret,
-                correctNote: getNoteAt(strings[stringIdx].open, fret)
-            };
-            challengeEl.innerText = `String ${currentChallenge.string}, Fret ${currentChallenge.fret}`;
-            inputEl.value = '';
-            inputEl.focus();
+        function init() {
+            ui = new FretboardUI('fretboard-ui', state, handleFretClick);
+            renderNoteButtons();
+            loadPB();
+            updatePBDisplay();
         }
 
-        function checkAnswer() {
-            const userAnswer = inputEl.value.trim().toUpperCase();
-            const correct = currentChallenge.correctNote.toUpperCase();
-            
-            // Basic alias support (e.g. Db for C#)
-            const isCorrect = (userAnswer === correct) || 
-                (correct === "C#" && userAnswer === "DB") ||
-                (correct === "D#" && userAnswer === "EB") ||
-                (correct === "F#" && userAnswer === "GB") ||
-                (correct === "G#" && userAnswer === "AB") ||
-                (correct === "A#" && userAnswer === "BB");
+        function renderNoteButtons() {
+            const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+            noteInputEl.innerHTML = notes.map(n => 
+                `<button class="note-btn" data-note="${n}">${n}</button>`
+            ).join('');
 
-            if (isCorrect) {
+            noteInputEl.querySelectorAll('.note-btn').forEach(btn => {
+                btn.addEventListener('click', () => submitAnswer(btn.dataset.note));
+            });
+        }
+
+        function handleFretClick(stringIdx, fret) {
+            if (state.status !== 'playing' || state.mode !== 'locate') return;
+            submitAnswer({ stringIdx, fret });
+        }
+
+        function submitAnswer(answer) {
+            const result = state.submitAnswer(answer);
+            
+            if (result.correct) {
                 feedbackEl.innerText = "Correct! ✅";
                 feedbackEl.style.color = "green";
-                score++;
             } else {
-                feedbackEl.innerText = `Incorrect. It was ${currentChallenge.correctNote}. ❌`;
+                feedbackEl.innerText = `Missed! ${state.mode === 'identify' ? 'It was ' + state.currentChallenge.correctNote : ''} ❌`;
                 feedbackEl.style.color = "red";
             }
-            totalAttempts++;
-            scoreEl.innerText = `Score: ${score}/${totalAttempts}`;
-            nextChallenge();
+
+            scoreEl.innerText = `Score: ${state.score}`;
+            
+            if (state.status === 'finished') {
+                endGame();
+            } else {
+                state.nextChallenge();
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            roundEl.innerText = `Round ${state.currentRound}/${state.rounds}`;
+            if (state.mode === 'identify') {
+                challengeEl.innerHTML = `What note is this?`;
+                noteInputEl.style.display = 'grid';
+            } else {
+                challengeEl.innerHTML = `Find <strong>${state.currentChallenge.correctNote}</strong> on string <strong>${state.currentChallenge.stringName}</strong>`;
+                noteInputEl.style.display = 'none';
+            }
+            ui.render();
         }
 
         function startGame() {
-            score = 0;
-            totalAttempts = 0;
-            scoreEl.innerText = '';
+            state.startRound();
             feedbackEl.innerText = '';
-            inputEl.style.display = 'block';
-            btnEl.innerText = 'Submit';
-            nextChallenge();
+            startBtn.style.display = 'none';
+            updateUI();
+            
+            timerInterval = setInterval(() => {
+                const time = state.getTotalTime();
+                timerEl.innerText = `${time.toFixed(2)}s`;
+            }, 50);
         }
 
         function endGame() {
-            challengeEl.innerText = "Game Over!";
-            inputEl.style.display = 'none';
-            btnEl.innerText = 'Play Again';
-            feedbackEl.innerText = `Final Score: ${score}/${maxAttempts}`;
+            clearInterval(timerInterval);
+            const totalTime = state.getTotalTime();
+            timerEl.innerText = `${totalTime.toFixed(2)}s`;
+            challengeEl.innerText = "Round Complete!";
+            feedbackEl.innerText = `Final: ${state.score}/${state.rounds} in ${totalTime.toFixed(2)}s`;
+            startBtn.style.display = 'block';
+            startBtn.innerText = 'Go Again';
+            noteInputEl.style.display = 'none';
+            
+            savePB(totalTime);
+            updatePBDisplay();
+            ui.render();
         }
 
-        btnEl.addEventListener('click', () => {
-            if (btnEl.innerText === 'Start Game' || btnEl.innerText === 'Play Again') {
-                startGame();
-            } else {
-                checkAnswer();
+        // Leaderboard logic
+        function savePB(time) {
+            if (state.score < state.rounds) return; // Only count perfect rounds for PB speed
+            const key = `pb_${state.mode}_${state.fretRange[1]}`;
+            const currentPB = localStorage.getItem(key);
+            if (!currentPB || time < parseFloat(currentPB)) {
+                localStorage.setItem(key, time.toString());
             }
+        }
+
+        function loadPB() {
+            const key = `pb_${state.mode}_${state.fretRange[1]}`;
+            return localStorage.getItem(key);
+        }
+
+        function updatePBDisplay() {
+            const pb = loadPB();
+            if (pb) {
+                pbEl.innerText = `Personal Best (${state.mode}, 0-${state.fretRange[1]}): ${parseFloat(pb).toFixed(2)}s`;
+            } else {
+                pbEl.innerText = 'No PB yet for this mode/range. Aim for 10/10!';
+            }
+        }
+
+        // Settings
+        document.getElementById('to-settings-btn').addEventListener('click', () => {
+            gameView.style.display = 'none';
+            settingsView.style.display = 'block';
         });
 
-        inputEl.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkAnswer();
+        document.getElementById('save-settings-btn').addEventListener('click', () => {
+            state.mode = document.getElementById('setting-mode').value;
+            state.fretRange = [0, parseInt(document.getElementById('setting-fret-max').value)];
+            settingsView.style.display = 'none';
+            gameView.style.display = 'block';
+            init();
         });
+
+        document.getElementById('setting-fret-max').addEventListener('input', (e) => {
+            document.getElementById('fret-range-val').innerText = `0 - ${e.target.value}`;
+        });
+
+        startBtn.addEventListener('click', startGame);
+
+        init();
     </script>
 </body>
 </html>
