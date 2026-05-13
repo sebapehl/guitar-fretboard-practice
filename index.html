@@ -50,9 +50,7 @@
             font-weight: bold;
             margin-bottom: 2rem;
             min-height: 3rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
         }
 
         #fretboard-ui {
@@ -241,7 +239,7 @@
                 challengeEl.innerHTML = `What note is this?`;
                 noteInputEl.style.display = 'grid';
             } else {
-                challengeEl.innerHTML = `Find <strong>${state.currentChallenge.correctNote}</strong> on string <strong>${state.currentChallenge.stringName}</strong>`;
+                challengeEl.innerHTML = `Find&nbsp;<strong>${state.currentChallenge.correctNote}</strong>&nbsp;on string&nbsp;<strong>${state.currentChallenge.stringName}</strong>`;
                 noteInputEl.style.display = 'none';
             }
             ui.render();
