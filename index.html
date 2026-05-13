@@ -168,12 +168,33 @@
         .btn-secondary { background: #6c757d; }
 
         /* Settings View */
-        #settings-view {
+        #settings-view, #auth-view {
             display: none;
             text-align: left;
         }
         .setting-group { margin-bottom: 1.5rem; }
         .setting-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        
+        /* Auth Styles */
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .auth-form input {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .auth-toggle {
+            margin-top: 15px;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: underline;
+        }
         
         /* Leaderboard */
         .pb-display {
@@ -204,11 +225,22 @@
             <li data-mode="playground">Playground</li>
             <li data-mode="identify">Fret ➔ Note</li>
             <li data-mode="locate">Note ➔ Fret</li>
+            <li id="menu-leaderboard">Leaderboard</li>
             <li id="menu-settings">Settings</li>
+            <li id="menu-auth">Account</li>
         </ul>
     </nav>
 
     <div class="container">
+        <div id="leaderboard-view" style="display: none;">
+            <h2>Leaderboard</h2>
+            <div id="leaderboard-list" style="margin: 20px 0; text-align: left;">
+                <p>Loading...</p>
+            </div>
+            <div class="controls">
+                <button class="btn" id="close-leaderboard-btn">Back to Game</button>
+            </div>
+        </div>
         <div id="game-view">
             <div class="stats-bar" id="stats-bar">
                 <div id="round-indicator">Round 0/10</div>
@@ -245,16 +277,41 @@
                 <button class="btn" id="save-settings-btn">Save & Close</button>
             </div>
         </div>
+
+        <div id="auth-view" style="display: none;">
+            <h2 id="auth-title">Login</h2>
+            <form class="auth-form" id="auth-form">
+                <input type="email" id="auth-email" placeholder="Email" required>
+                <input type="password" id="auth-password" placeholder="Password" required>
+                <button type="submit" class="btn" id="auth-submit-btn">Login</button>
+            </form>
+            <div class="auth-toggle" id="auth-toggle-mode">Don't have an account? Sign up</div>
+            <div id="auth-error" style="color: red; margin-top: 10px;"></div>
+        </div>
+
+        <div id="profile-view" style="display: none;">
+            <h2>Your Profile</h2>
+            <div class="setting-group">
+                <p>Logged in as: <strong id="user-email-display"></strong></p>
+            </div>
+            <div class="controls">
+                <button class="btn btn-secondary" id="logout-btn">Logout</button>
+                <button class="btn" id="close-profile-btn">Back to Game</button>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { GameState, NOTES, STRINGS, getNoteAt } from './fretboard.js';
         import { FretboardUI } from './ui.js';
+        import { supabase } from './supabase.js';
 
         const state = new GameState();
         let ui;
         let timerInterval;
         let activeNavMode = 'playground';
+        let authMode = 'login';
+        let currentUser = null;
 
         // DOM Elements
         const gameView = document.getElementById('game-view');
@@ -272,12 +329,51 @@
         const sideNav = document.getElementById('side-nav');
         const navItems = document.querySelectorAll('nav li[data-mode]');
 
+        // Auth DOM
+        const authView = document.getElementById('auth-view');
+        const profileView = document.getElementById('profile-view');
+        const authForm = document.getElementById('auth-form');
+        const authEmailInput = document.getElementById('auth-email');
+        const authPasswordInput = document.getElementById('auth-password');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        const authToggleMode = document.getElementById('auth-toggle-mode');
+        const authErrorEl = document.getElementById('auth-error');
+        const userEmailDisplay = document.getElementById('user-email-display');
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Leaderboard DOM
+        const leaderboardView = document.getElementById('leaderboard-view');
+        const leaderboardListEl = document.getElementById('leaderboard-list');
+
         function init() {
             ui = new FretboardUI('fretboard-ui', state, handleFretClick);
             renderNoteButtons();
             loadPB();
             updatePBDisplay();
             setAppMode('playground');
+
+            // Listen for auth changes
+            supabase.auth.onAuthStateChange((event, session) => {
+                currentUser = session?.user || null;
+                updateAuthUI();
+            });
+        }
+
+        function updateAuthUI() {
+            const authMenu = document.getElementById('menu-auth');
+            if (currentUser) {
+                authMenu.innerText = `Account (${currentUser.email.split('@')[0]})`;
+            } else {
+                authMenu.innerText = 'Login / Sign Up';
+            }
+        }
+
+        function showView(viewName) {
+            gameView.style.display = viewName === 'game' ? 'block' : 'none';
+            settingsView.style.display = viewName === 'settings' ? 'block' : 'none';
+            authView.style.display = viewName === 'auth' ? 'block' : 'none';
+            profileView.style.display = viewName === 'profile' ? 'block' : 'none';
+            leaderboardView.style.display = viewName === 'leaderboard' ? 'block' : 'none';
         }
 
         // Navigation & Menu
@@ -301,20 +397,125 @@
 
         document.getElementById('menu-settings').addEventListener('click', () => {
             stopGame();
-            gameView.style.display = 'none';
-            settingsView.style.display = 'block';
+            showView('settings');
             sideNav.classList.remove('open');
+        });
+
+        document.getElementById('menu-leaderboard').addEventListener('click', () => {
+            stopGame();
+            showView('leaderboard');
+            fetchLeaderboard();
+            sideNav.classList.remove('open');
+        });
+
+        document.getElementById('close-leaderboard-btn').addEventListener('click', () => {
+            showView('game');
+        });
+
+        async function fetchLeaderboard() {
+            leaderboardListEl.innerHTML = '<p>Loading...</p>';
+            try {
+                const { data, error } = await supabase
+                    .from('scores')
+                    .select('*, profiles(username)')
+                    .eq('accuracy', 1) 
+                    .order('total_time_ms', { ascending: true })
+                    .limit(10);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    leaderboardListEl.innerHTML = '<p>No perfect scores yet!</p>';
+                    return;
+                }
+
+                leaderboardListEl.innerHTML = `
+                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #eee;">
+                                <th style="text-align: left; padding: 10px;">User</th>
+                                <th style="text-align: left; padding: 10px;">Mode</th>
+                                <th style="text-align: left; padding: 10px;">Range</th>
+                                <th style="text-align: right; padding: 10px;">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.map(s => `
+                                <tr style="border-bottom: 1px solid #eee;">
+                                    <td style="padding: 10px;">${s.profiles?.username || 'Anonymous'}</td>
+                                    <td style="padding: 10px;">${s.mode}</td>
+                                    <td style="padding: 10px;">0-${s.fret_max}</td>
+                                    <td style="padding: 10px; text-align: right;">${(s.total_time_ms / 1000).toFixed(2)}s</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (err) {
+                leaderboardListEl.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+            }
+        }
+
+        document.getElementById('menu-auth').addEventListener('click', () => {
+            stopGame();
+            if (currentUser) {
+                userEmailDisplay.innerText = currentUser.email;
+                showView('profile');
+            } else {
+                showView('auth');
+            }
+            sideNav.classList.remove('open');
+        });
+
+        // Auth Logic
+        authToggleMode.addEventListener('click', () => {
+            authMode = authMode === 'login' ? 'signup' : 'login';
+            document.getElementById('auth-title').innerText = authMode === 'login' ? 'Login' : 'Sign Up';
+            authSubmitBtn.innerText = authMode === 'login' ? 'Login' : 'Sign Up';
+            authToggleMode.innerText = authMode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Login";
+            authErrorEl.innerText = '';
+        });
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            authErrorEl.innerText = '';
+            const email = authEmailInput.value;
+            const password = authPasswordInput.value;
+
+            try {
+                if (authMode === 'login') {
+                    const { error } = await supabase.auth.signInWithPassword({ email, password });
+                    if (error) throw error;
+                    showView('game');
+                } else {
+                    const { error } = await supabase.auth.signUp({ email, password });
+                    if (error) throw error;
+                    alert('Check your email for the confirmation link!');
+                    authMode = 'login';
+                    authToggleMode.click(); // Reset to login
+                }
+            } catch (error) {
+                authErrorEl.innerText = error.message;
+            }
+        });
+
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            showView('game');
+        });
+
+        document.getElementById('close-profile-btn').addEventListener('click', () => {
+            showView('game');
         });
 
         function setAppMode(mode) {
             stopGame();
             activeNavMode = mode;
-            state.mode = mode === 'playground' ? 'identify' : mode; // Map playground to identify for logic purposes
+            state.mode = mode === 'playground' ? 'identify' : mode; 
             
             navItems.forEach(i => i.classList.toggle('active', i.dataset.mode === mode));
             
-            gameView.style.display = 'block';
-            settingsView.style.display = 'none';
+            showView('game');
 
             if (mode === 'playground') {
                 statsBar.classList.remove('visible');
@@ -430,18 +631,38 @@
             startBtn.innerText = 'Go Again';
             noteInputEl.style.display = 'none';
             
-            savePB(totalTime);
+            saveScore(totalTime);
             updatePBDisplay();
             ui.render();
         }
 
         // Leaderboard
-        function savePB(time) {
-            if (state.score < state.rounds) return;
-            const key = `pb_${state.mode}_${state.fretRange[1]}`;
-            const currentPB = localStorage.getItem(key);
-            if (!currentPB || time < parseFloat(currentPB)) {
-                localStorage.setItem(key, time.toString());
+        async function saveScore(time) {
+            // Local storage PB (only for perfect scores)
+            if (state.score === state.rounds) {
+                const key = `pb_${state.mode}_${state.fretRange[1]}`;
+                const currentPB = localStorage.getItem(key);
+                if (!currentPB || time < parseFloat(currentPB)) {
+                    localStorage.setItem(key, time.toString());
+                }
+            }
+
+            // Supabase Save
+            if (currentUser) {
+                try {
+                    const { error } = await supabase.from('scores').insert({
+                        user_id: currentUser.id,
+                        mode: state.mode,
+                        fret_max: state.fretRange[1],
+                        total_time_ms: time * 1000,
+                        accuracy: state.score / state.rounds,
+                        history: state.history
+                    });
+                    if (error) throw error;
+                    console.log('Score saved to Supabase');
+                } catch (err) {
+                    console.error('Failed to save score:', err.message);
+                }
             }
         }
 
