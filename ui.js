@@ -53,7 +53,7 @@ export class FretboardUI {
             }
         });
 
-        // Draw clickable zones and highlights
+        // Draw clickable zones
         for (let s = 0; s < 6; s++) {
             for (let f = minFret; f <= maxFret; f++) {
                 const x = f === minFret ? this.margin.left - 20 : this.margin.left + (f - minFret) * this.fretWidth - this.fretWidth;
@@ -61,28 +61,51 @@ export class FretboardUI {
                 const w = f === minFret ? 20 : this.fretWidth;
                 const h = this.stringHeight;
 
-                const isHighlighted = this.game.status === 'playing' && 
+                const isChallengePos = this.game.status === 'playing' && 
                                      this.game.mode === 'identify' && 
                                      this.game.currentChallenge && 
                                      this.game.currentChallenge.stringIdx === s && 
                                      this.game.currentChallenge.fret === f;
 
                 html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" 
-                          fill="${isHighlighted ? 'rgba(0,123,255,0.4)' : 'transparent'}" 
+                          fill="${isChallengePos ? 'rgba(0,123,255,0.2)' : 'transparent'}" 
                           class="fret-target" data-string="${s}" data-fret="${f}" 
                           style="cursor: pointer;" />`;
                 
-                if (isHighlighted) {
-                    html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="8" fill="#007bff" />`;
+                if (isChallengePos) {
+                    html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="8" fill="#007bff" opacity="0.6" />`;
+                }
+
+                // Permanent feedback dot (if exists)
+                if (this.feedbackPos && this.feedbackPos.stringIdx === s && this.feedbackPos.fret === f) {
+                    html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="10" fill="${this.feedbackPos.color}" />`;
                 }
             }
         }
+
+        // Hover dot (dynamic)
+        html += `<circle id="hover-dot" cx="0" cy="0" r="8" fill="rgba(0,123,255,0.3)" style="display: none; pointer-events: none;" />`;
 
         html += '</svg>';
         this.container.innerHTML = html;
 
         // Add event listeners
+        const hoverDot = this.container.querySelector('#hover-dot');
+
         this.container.querySelectorAll('.fret-target').forEach(el => {
+            el.addEventListener('mouseenter', (e) => {
+                const rect = e.target;
+                const cx = parseFloat(rect.getAttribute('x')) + parseFloat(rect.getAttribute('width')) / 2;
+                const cy = parseFloat(rect.getAttribute('y')) + parseFloat(rect.getAttribute('height')) / 2;
+                hoverDot.setAttribute('cx', cx);
+                hoverDot.setAttribute('cy', cy);
+                hoverDot.style.display = 'block';
+            });
+
+            el.addEventListener('mouseleave', () => {
+                hoverDot.style.display = 'none';
+            });
+
             el.addEventListener('click', (e) => {
                 const stringIdx = parseInt(e.target.dataset.string);
                 const fret = parseInt(e.target.dataset.fret);
@@ -91,8 +114,16 @@ export class FretboardUI {
         });
     }
 
-    highlightCorrect(stringIdx, fret) {
-        // Visual feedback for correct/incorrect can be added here
+    showFeedback(stringIdx, fret, isCorrect) {
+        this.feedbackPos = {
+            stringIdx,
+            fret,
+            color: isCorrect ? '#28a745' : '#dc3545'
+        };
         this.render();
+        setTimeout(() => {
+            this.feedbackPos = null;
+            this.render();
+        }, 500);
     }
 }

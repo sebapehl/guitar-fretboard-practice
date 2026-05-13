@@ -213,8 +213,21 @@
         }
 
         function submitAnswer(answer) {
+            // Determine which fret/string to highlight for feedback
+            let feedbackStringIdx, feedbackFret;
+            if (state.mode === 'identify') {
+                feedbackStringIdx = state.currentChallenge.stringIdx;
+                feedbackFret = state.currentChallenge.fret;
+            } else {
+                feedbackStringIdx = answer.stringIdx;
+                feedbackFret = answer.fret;
+            }
+
             const result = state.submitAnswer(answer);
             
+            // Show visual feedback on fretboard
+            ui.showFeedback(feedbackStringIdx, feedbackFret, result.correct);
+
             if (result.correct) {
                 feedbackEl.innerText = "Correct! ✅";
                 feedbackEl.style.color = "green";
@@ -225,11 +238,14 @@
 
             scoreEl.innerText = `Score: ${state.score}`;
             
+            // Small delay so user sees the green/red dot before UI resets
             if (state.status === 'finished') {
-                endGame();
+                setTimeout(endGame, 500);
             } else {
-                state.nextChallenge();
-                updateUI();
+                setTimeout(() => {
+                    state.nextChallenge();
+                    updateUI();
+                }, 500);
             }
         }
 
