@@ -78,7 +78,10 @@ export class FretboardUI {
 
                 // Permanent feedback dot (if exists)
                 if (this.feedbackPos && this.feedbackPos.stringIdx === s && this.feedbackPos.fret === f) {
-                    html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="10" fill="${this.feedbackPos.color}" />`;
+                    html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="12" fill="${this.feedbackPos.color}" />`;
+                    if (this.feedbackPos.label) {
+                        html += `<text x="${x + w/2}" y="${y + h/2 + 4}" font-size="10" font-weight="bold" text-anchor="middle" fill="white">${this.feedbackPos.label}</text>`;
+                    }
                 }
             }
         }
@@ -114,11 +117,12 @@ export class FretboardUI {
         });
     }
 
-    showFeedback(stringIdx, fret, isCorrect) {
+    showFeedback(stringIdx, fret, isCorrect, label = null) {
         this.feedbackPos = {
             stringIdx,
             fret,
-            color: isCorrect ? '#28a745' : '#dc3545'
+            color: isCorrect ? '#28a745' : '#dc3545',
+            label
         };
         this.render();
         setTimeout(() => {

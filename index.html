@@ -170,7 +170,7 @@
     </div>
 
     <script type="module">
-        import { GameState, NOTES } from './fretboard.js';
+        import { GameState, NOTES, STRINGS, getNoteAt } from './fretboard.js';
         import { FretboardUI } from './ui.js';
 
         const state = new GameState();
@@ -194,6 +194,7 @@
             renderNoteButtons();
             loadPB();
             updatePBDisplay();
+            challengeEl.innerHTML = "Click the fretboard to explore or press Start!";
         }
 
         function renderNoteButtons() {
@@ -208,8 +209,14 @@
         }
 
         function handleFretClick(stringIdx, fret) {
-            if (state.status !== 'playing' || state.mode !== 'locate') return;
-            submitAnswer({ stringIdx, fret });
+            if (state.status === 'playing') {
+                if (state.mode !== 'locate') return;
+                submitAnswer({ stringIdx, fret });
+            } else {
+                // Free Play mode
+                const note = getNoteAt(STRINGS[stringIdx].open, fret);
+                ui.showFeedback(stringIdx, fret, true, note);
+            }
         }
 
         function submitAnswer(answer) {
