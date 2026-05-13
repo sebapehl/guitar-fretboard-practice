@@ -11,6 +11,7 @@
             --card-bg: #ffffff;
             --text: #212529;
             --text-muted: #6c757d;
+            --nav-bg: #343a40;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -22,7 +23,65 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
+            padding-top: 80px; /* Space for fixed header */
         }
+
+        /* Burger Menu & Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--nav-bg);
+            color: white;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .burger-icon {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-right: 20px;
+        }
+        .burger-icon span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+            transition: 0.3s;
+        }
+        header h2 { margin: 0; font-size: 1.2rem; }
+
+        nav {
+            position: fixed;
+            top: 60px;
+            left: -250px;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            transition: 0.3s;
+            z-index: 999;
+            padding-top: 20px;
+        }
+        nav.open { left: 0; }
+        nav ul { list-style: none; padding: 0; margin: 0; }
+        nav li {
+            padding: 15px 25px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text);
+        }
+        nav li:hover { background: #f8f9fa; color: var(--primary); }
+        nav li.active { background: #e7f3ff; color: var(--primary); }
+
         .container {
             background: var(--card-bg);
             padding: 2rem;
@@ -39,7 +98,10 @@
             margin-bottom: 20px;
             font-weight: 600;
             color: var(--text-muted);
+            opacity: 0;
+            pointer-events: none;
         }
+        .stats-bar.visible { opacity: 1; pointer-events: auto; }
         .timer { font-size: 1.5rem; color: var(--text); }
         
         .challenge-display {
@@ -119,12 +181,36 @@
             font-size: 0.9rem;
             color: var(--text-muted);
         }
+
+        @media (max-width: 600px) {
+            .note-buttons { grid-template-columns: repeat(4, 1fr); }
+            .container { padding: 1rem; }
+            body { padding-top: 70px; }
+        }
     </style>
 </head>
 <body>
+    <header>
+        <div class="burger-icon" id="burger-btn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <h2>Fretboard Mastery</h2>
+    </header>
+
+    <nav id="side-nav">
+        <ul>
+            <li data-mode="playground">Playground</li>
+            <li data-mode="identify">Fret ➔ Note</li>
+            <li data-mode="locate">Note ➔ Fret</li>
+            <li id="menu-settings">Settings</li>
+        </ul>
+    </nav>
+
     <div class="container">
         <div id="game-view">
-            <div class="stats-bar">
+            <div class="stats-bar" id="stats-bar">
                 <div id="round-indicator">Round 0/10</div>
                 <div class="timer" id="timer-display">00.00s</div>
                 <div id="score-indicator">Score: 0</div>
@@ -142,9 +228,8 @@
 
             <div class="feedback" id="feedback-text"></div>
 
-            <div class="controls">
+            <div class="controls" id="main-controls">
                 <button class="btn" id="start-btn">Start 10-Note Sprint</button>
-                <button class="btn btn-secondary" id="to-settings-btn">Settings</button>
             </div>
 
             <div class="pb-display" id="pb-text"></div>
@@ -153,18 +238,11 @@
         <div id="settings-view">
             <h2>Settings</h2>
             <div class="setting-group">
-                <label>Mode</label>
-                <select id="setting-mode">
-                    <option value="identify">Identify Note (Physical ➔ Name)</option>
-                    <option value="locate">Locate Fret (Name ➔ Physical)</option>
-                </select>
-            </div>
-            <div class="setting-group">
                 <label>Fret Range: <span id="fret-range-val">0 - 12</span></label>
                 <input type="range" id="setting-fret-max" min="1" max="22" value="12">
             </div>
             <div class="controls">
-                <button class="btn" id="save-settings-btn">Save & Back</button>
+                <button class="btn" id="save-settings-btn">Save & Close</button>
             </div>
         </div>
     </div>
@@ -176,6 +254,7 @@
         const state = new GameState();
         let ui;
         let timerInterval;
+        let activeNavMode = 'playground';
 
         // DOM Elements
         const gameView = document.getElementById('game-view');
@@ -188,18 +267,76 @@
         const scoreEl = document.getElementById('score-indicator');
         const startBtn = document.getElementById('start-btn');
         const pbEl = document.getElementById('pb-text');
+        const statsBar = document.getElementById('stats-bar');
+        const burgerBtn = document.getElementById('burger-btn');
+        const sideNav = document.getElementById('side-nav');
+        const navItems = document.querySelectorAll('nav li[data-mode]');
 
         function init() {
             ui = new FretboardUI('fretboard-ui', state, handleFretClick);
             renderNoteButtons();
             loadPB();
             updatePBDisplay();
-            challengeEl.innerHTML = "Click the fretboard to explore or press Start!";
+            setAppMode('playground');
+        }
+
+        // Navigation & Menu
+        burgerBtn.addEventListener('click', () => {
+            sideNav.classList.toggle('open');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sideNav.contains(e.target) && !burgerBtn.contains(e.target)) {
+                sideNav.classList.remove('open');
+            }
+        });
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const mode = item.dataset.mode;
+                setAppMode(mode);
+                sideNav.classList.remove('open');
+            });
+        });
+
+        document.getElementById('menu-settings').addEventListener('click', () => {
+            stopGame();
+            gameView.style.display = 'none';
+            settingsView.style.display = 'block';
+            sideNav.classList.remove('open');
+        });
+
+        function setAppMode(mode) {
+            stopGame();
+            activeNavMode = mode;
+            state.mode = mode === 'playground' ? 'identify' : mode; // Map playground to identify for logic purposes
+            
+            navItems.forEach(i => i.classList.toggle('active', i.dataset.mode === mode));
+            
+            gameView.style.display = 'block';
+            settingsView.style.display = 'none';
+
+            if (mode === 'playground') {
+                statsBar.classList.remove('visible');
+                startBtn.style.display = 'none';
+                noteInputEl.style.display = 'none';
+                challengeEl.innerHTML = "Playground: Explore the neck!";
+                pbEl.style.display = 'none';
+            } else {
+                statsBar.classList.remove('visible');
+                startBtn.style.display = 'block';
+                startBtn.innerText = `Start ${mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret'} Sprint`;
+                noteInputEl.style.display = 'none';
+                challengeEl.innerHTML = mode === 'identify' ? "Identify the highlighted fret!" : "Locate the given note on the string!";
+                pbEl.style.display = 'block';
+                updatePBDisplay();
+            }
+            feedbackEl.innerText = '';
+            ui.render();
         }
 
         function renderNoteButtons() {
-            const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-            noteInputEl.innerHTML = notes.map(n => 
+            noteInputEl.innerHTML = NOTES.map(n => 
                 `<button class="note-btn" data-note="${n}">${n}</button>`
             ).join('');
 
@@ -220,7 +357,6 @@
         }
 
         function submitAnswer(answer) {
-            // Determine which fret/string to highlight for feedback
             let feedbackStringIdx, feedbackFret;
             if (state.mode === 'identify') {
                 feedbackStringIdx = state.currentChallenge.stringIdx;
@@ -231,8 +367,6 @@
             }
 
             const result = state.submitAnswer(answer);
-            
-            // Show visual feedback on fretboard
             ui.showFeedback(feedbackStringIdx, feedbackFret, result.correct);
 
             if (result.correct) {
@@ -245,7 +379,6 @@
 
             scoreEl.innerText = `Score: ${state.score}`;
             
-            // Small delay so user sees the green/red dot before UI resets
             if (state.status === 'finished') {
                 setTimeout(endGame, 500);
             } else {
@@ -272,12 +405,19 @@
             state.startRound();
             feedbackEl.innerText = '';
             startBtn.style.display = 'none';
+            statsBar.classList.add('visible');
             updateUI();
             
             timerInterval = setInterval(() => {
                 const time = state.getTotalTime();
                 timerEl.innerText = `${time.toFixed(2)}s`;
             }, 50);
+        }
+
+        function stopGame() {
+            clearInterval(timerInterval);
+            state.status = 'idle';
+            state.currentChallenge = null;
         }
 
         function endGame() {
@@ -295,9 +435,9 @@
             ui.render();
         }
 
-        // Leaderboard logic
+        // Leaderboard
         function savePB(time) {
-            if (state.score < state.rounds) return; // Only count perfect rounds for PB speed
+            if (state.score < state.rounds) return;
             const key = `pb_${state.mode}_${state.fretRange[1]}`;
             const currentPB = localStorage.getItem(key);
             if (!currentPB || time < parseFloat(currentPB)) {
@@ -312,25 +452,18 @@
 
         function updatePBDisplay() {
             const pb = loadPB();
+            const modeName = state.mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret';
             if (pb) {
-                pbEl.innerText = `Personal Best (${state.mode}, 0-${state.fretRange[1]}): ${parseFloat(pb).toFixed(2)}s`;
+                pbEl.innerText = `Personal Best (${modeName}, 0-${state.fretRange[1]}): ${parseFloat(pb).toFixed(2)}s`;
             } else {
                 pbEl.innerText = 'No PB yet for this mode/range. Aim for 10/10!';
             }
         }
 
-        // Settings
-        document.getElementById('to-settings-btn').addEventListener('click', () => {
-            gameView.style.display = 'none';
-            settingsView.style.display = 'block';
-        });
-
+        // Settings View
         document.getElementById('save-settings-btn').addEventListener('click', () => {
-            state.mode = document.getElementById('setting-mode').value;
             state.fretRange = [0, parseInt(document.getElementById('setting-fret-max').value)];
-            settingsView.style.display = 'none';
-            gameView.style.display = 'block';
-            init();
+            setAppMode(activeNavMode);
         });
 
         document.getElementById('setting-fret-max').addEventListener('input', (e) => {
