@@ -7,7 +7,7 @@ export class FretboardUI {
         this.onFretClick = onFretClick;
         this.fretWidth = 60;
         this.stringHeight = 25;
-        this.margin = { top: 20, right: 20, bottom: 20, left: 50 };
+        this.margin = { top: 20, right: 20, bottom: 35, left: 50 };
         this.render();
     }
 
@@ -28,9 +28,9 @@ export class FretboardUI {
             
             // Fret numbers
             if (!isNut) {
-                html += `<text x="${x - this.fretWidth/2}" y="${height - 2}" font-size="12" text-anchor="middle" fill="#666">${i + minFret}</text>`;
+                html += `<text x="${x - this.fretWidth/2}" y="${height - 5}" font-size="12" text-anchor="middle" fill="#666">${i + minFret}</text>`;
             } else {
-                html += `<text x="${x - 25}" y="${height - 2}" font-size="10" font-weight="bold" text-anchor="middle" fill="#999">OPEN</text>`;
+                html += `<text x="${x - 25}" y="${height - 5}" font-size="10" font-weight="bold" text-anchor="middle" fill="#999">OPEN</text>`;
             }
         }
 
