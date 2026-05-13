@@ -7,7 +7,7 @@ export class FretboardUI {
         this.onFretClick = onFretClick;
         this.fretWidth = 60;
         this.stringHeight = 25;
-        this.margin = { top: 20, right: 20, bottom: 20, left: 30 };
+        this.margin = { top: 20, right: 20, bottom: 20, left: 50 };
         this.render();
     }
 
@@ -29,6 +29,8 @@ export class FretboardUI {
             // Fret numbers
             if (!isNut) {
                 html += `<text x="${x - this.fretWidth/2}" y="${height - 2}" font-size="12" text-anchor="middle" fill="#666">${i + minFret}</text>`;
+            } else {
+                html += `<text x="${x - 25}" y="${height - 2}" font-size="10" font-weight="bold" text-anchor="middle" fill="#999">OPEN</text>`;
             }
         }
 
@@ -56,9 +58,10 @@ export class FretboardUI {
         // Draw clickable zones
         for (let s = 0; s < 6; s++) {
             for (let f = minFret; f <= maxFret; f++) {
-                const x = f === minFret ? this.margin.left - 20 : this.margin.left + (f - minFret) * this.fretWidth - this.fretWidth;
+                const isNut = f === 0;
+                const x = isNut ? this.margin.left - 40 : this.margin.left + (f - minFret) * this.fretWidth - this.fretWidth;
                 const y = this.margin.top + s * this.stringHeight - this.stringHeight / 2;
-                const w = f === minFret ? 20 : this.fretWidth;
+                const w = isNut ? 40 : this.fretWidth;
                 const h = this.stringHeight;
 
                 const isChallengePos = this.game.status === 'playing' && 
@@ -67,20 +70,28 @@ export class FretboardUI {
                                      this.game.currentChallenge.stringIdx === s && 
                                      this.game.currentChallenge.fret === f;
 
+                // Open string indicator circle
+                if (isNut) {
+                    html += `<circle cx="${this.margin.left - 20}" cy="${y + h/2}" r="10" 
+                              fill="${isChallengePos ? '#007bff' : 'white'}" 
+                              stroke="${isChallengePos ? '#007bff' : '#ccc'}" stroke-width="2" />`;
+                }
+
                 html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" 
-                          fill="${isChallengePos ? 'rgba(0,123,255,0.2)' : 'transparent'}" 
+                          fill="transparent" 
                           class="fret-target" data-string="${s}" data-fret="${f}" 
                           style="cursor: pointer;" />`;
                 
-                if (isChallengePos) {
+                if (isChallengePos && !isNut) {
                     html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="8" fill="#007bff" opacity="0.6" />`;
                 }
 
                 // Permanent feedback dot (if exists)
                 if (this.feedbackPos && this.feedbackPos.stringIdx === s && this.feedbackPos.fret === f) {
-                    html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="12" fill="${this.feedbackPos.color}" />`;
+                    const fx = isNut ? this.margin.left - 20 : x + w/2;
+                    html += `<circle cx="${fx}" cy="${y + h/2}" r="12" fill="${this.feedbackPos.color}" />`;
                     if (this.feedbackPos.label) {
-                        html += `<text x="${x + w/2}" y="${y + h/2 + 4}" font-size="10" font-weight="bold" text-anchor="middle" fill="white">${this.feedbackPos.label}</text>`;
+                        html += `<text x="${fx}" y="${y + h/2 + 4}" font-size="10" font-weight="bold" text-anchor="middle" fill="white">${this.feedbackPos.label}</text>`;
                     }
                 }
             }
