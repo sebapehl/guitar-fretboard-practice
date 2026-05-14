@@ -346,7 +346,7 @@
             debugEl.scrollTop = debugEl.scrollHeight;
         }
 
-        async function withTimeout(promise, ms = 10000) {
+        async function withTimeout(promise, ms = 20000) {
             let timeoutId;
             const timeout = new Promise((_, reject) => 
                 timeoutId = setTimeout(() => reject(new Error(`Timed out after ${ms/1000}s`)), ms)
@@ -772,21 +772,24 @@
             // Supabase Save
             if (currentUser) {
                 dbStatusEl.innerText = '☁️ Saving to cloud...';
+                logDebug('Saving score to cloud...');
                 try {
-                    const { error } = await supabase.from('scores').insert({
+                    const { error } = await withTimeout(supabase.from('scores').insert({
                         user_id: currentUser.id,
                         mode: state.mode,
                         fret_max: state.fretRange[1],
                         total_time_ms: time * 1000,
                         accuracy: state.score / state.rounds,
                         history: state.history
-                    });
+                    }));
                     if (error) throw error;
                     dbStatusEl.innerText = '✅ Score synced to cloud';
                     dbStatusEl.style.color = 'green';
+                    logDebug('Score saved successfully');
                 } catch (err) {
                     dbStatusEl.innerText = `❌ Cloud sync failed: ${err.message}`;
                     dbStatusEl.style.color = 'red';
+                    logDebug(`Score save failed: ${err.message}`);
                     console.error('Failed to save score:', err.message);
                 }
             }
