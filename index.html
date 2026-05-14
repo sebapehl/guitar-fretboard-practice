@@ -219,6 +219,24 @@
             display: none;
         }
 
+        .game-over-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 2000;
+            display: none;
+        }
+        .game-over-overlay h1 { font-size: 3rem; margin-bottom: 0.5rem; color: #ffc107; }
+        .game-over-overlay .final-stats { font-size: 1.5rem; margin-bottom: 2rem; }
+
         @media (max-width: 600px) {
             .note-buttons { grid-template-columns: repeat(4, 1fr); }
             .container { padding: 1rem; }
@@ -326,6 +344,17 @@
 
     <div id="debug-console"></div>
 
+    <div class="game-over-overlay" id="game-over-screen">
+        <h1>ROUND COMPLETE!</h1>
+        <div class="final-stats" id="final-stats-text">
+            Score: 10/10 in 12.34s
+        </div>
+        <div class="controls">
+            <button class="btn" id="play-again-btn">Play Again</button>
+            <button class="btn btn-secondary" id="close-overlay-btn">Close</button>
+        </div>
+    </div>
+
     <script type="module">
         import { GameState, NOTES, STRINGS, getNoteAt } from './fretboard.js';
         import { FretboardUI } from './ui.js';
@@ -382,6 +411,12 @@
         const authErrorEl = document.getElementById('auth-error');
         const userEmailDisplay = document.getElementById('user-email-display');
         const logoutBtn = document.getElementById('logout-btn');
+
+        // Game Over DOM
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalStatsText = document.getElementById('final-stats-text');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const closeOverlayBtn = document.getElementById('close-overlay-btn');
 
         // Leaderboard DOM
         const leaderboardView = document.getElementById('leaderboard-view');
@@ -730,6 +765,7 @@
             dbStatusEl.innerText = '';
             dbStatusEl.style.color = 'inherit';
             startBtn.style.display = 'none';
+            gameOverScreen.style.display = 'none';
             statsBar.classList.add('visible');
             updateUI();
             
@@ -756,10 +792,20 @@
             startBtn.innerText = 'Go Again';
             noteInputEl.style.display = 'none';
             
+            // Show overlay
+            finalStatsText.innerText = `Final Score: ${state.score}/${state.rounds} in ${totalTime.toFixed(2)}s`;
+            gameOverScreen.style.display = 'flex';
+
             saveScore(totalTime);
             updatePBDisplay();
             ui.render();
         }
+
+        // Overlay controls
+        playAgainBtn.addEventListener('click', startGame);
+        closeOverlayBtn.addEventListener('click', () => {
+            gameOverScreen.style.display = 'none';
+        });
 
         // Leaderboard
         async function saveScore(time) {
