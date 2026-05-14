@@ -744,6 +744,7 @@
         }
 
         function endGame() {
+            logDebug('Game finished, calling endGame');
             clearInterval(timerInterval);
             const totalTime = state.getTotalTime();
             timerEl.innerText = `${totalTime.toFixed(2)}s`;
@@ -760,6 +761,7 @@
 
         // Leaderboard
         async function saveScore(time) {
+            logDebug(`saveScore called (score: ${state.score}/${state.rounds})`);
             // Local storage PB (only for perfect scores)
             if (state.score === state.rounds) {
                 const key = `pb_${state.mode}_${state.fretRange[1]}`;
@@ -770,9 +772,16 @@
             }
 
             // Supabase Save
+            if (!currentUser) {
+                logDebug('currentUser null in saveScore, checking session...');
+                const { data: { session } } = await supabase.auth.getSession();
+                currentUser = session?.user || null;
+                if (currentUser) logDebug(`Session recovered for ${currentUser.email}`);
+            }
+
             if (currentUser) {
                 dbStatusEl.innerText = '☁️ Saving to cloud...';
-                logDebug('Saving score to cloud...');
+                logDebug('Attempting cloud save...');
                 try {
                     const { error } = await withTimeout(supabase.from('scores').insert({
                         user_id: currentUser.id,
@@ -785,13 +794,16 @@
                     if (error) throw error;
                     dbStatusEl.innerText = '✅ Score synced to cloud';
                     dbStatusEl.style.color = 'green';
-                    logDebug('Score saved successfully');
+                    logDebug('Cloud save SUCCESS');
                 } catch (err) {
                     dbStatusEl.innerText = `❌ Cloud sync failed: ${err.message}`;
                     dbStatusEl.style.color = 'red';
-                    logDebug(`Score save failed: ${err.message}`);
+                    logDebug(`Cloud save FAILED: ${err.message}`);
                     console.error('Failed to save score:', err.message);
                 }
+            } else {
+                logDebug('Cloud save SKIPPED: No user logged in');
+                dbStatusEl.innerText = '⚠️ Login to sync scores';
             }
         }
 
