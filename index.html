@@ -294,7 +294,13 @@
             <div class="setting-group">
                 <p>Logged in as: <strong id="user-email-display"></strong></p>
             </div>
-            <div class="controls">
+            
+            <div id="user-stats" style="margin-top: 20px; text-align: left;">
+                <h3>My Recent Perfect Scores</h3>
+                <div id="my-scores-list">Loading...</div>
+            </div>
+
+            <div class="controls" style="margin-top: 30px;">
                 <button class="btn btn-secondary" id="logout-btn">Logout</button>
                 <button class="btn" id="close-profile-btn">Back to Game</button>
             </div>
@@ -464,11 +470,42 @@
             if (currentUser) {
                 userEmailDisplay.innerText = currentUser.email;
                 showView('profile');
+                fetchMyScores();
             } else {
                 showView('auth');
             }
             sideNav.classList.remove('open');
         });
+
+        async function fetchMyScores() {
+            const listEl = document.getElementById('my-scores-list');
+            listEl.innerHTML = 'Loading...';
+            try {
+                const { data, error } = await supabase
+                    .from('scores')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('accuracy', 1)
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+                
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    listEl.innerHTML = '<p>No perfect scores yet. Go play!</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.map(s => `
+                    <div style="padding: 8px; border-bottom: 1px solid #eee;">
+                        <strong>${s.mode}</strong> (0-${s.fret_max}): 
+                        ${(s.total_time_ms / 1000).toFixed(2)}s 
+                        <span style="color: #666; font-size: 0.8rem;">- ${new Date(s.created_at).toLocaleDateString()}</span>
+                    </div>
+                `).join('');
+            } catch (err) {
+                listEl.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+            }
+        }
 
         // Auth Logic
         authToggleMode.addEventListener('click', () => {
@@ -491,8 +528,17 @@
                     if (error) throw error;
                     showView('game');
                 } else {
-                    const { error } = await supabase.auth.signUp({ email, password });
+                    const { data, error } = await supabase.auth.signUp({ email, password });
                     if (error) throw error;
+                    
+                    // Trigger manual profile creation just in case the SQL trigger was late
+                    if (data?.user) {
+                        await supabase.from('profiles').upsert({
+                            id: data.user.id,
+                            username: email.split('@')[0],
+                        });
+                    }
+
                     alert('Check your email for the confirmation link!');
                     authMode = 'login';
                     authToggleMode.click(); // Reset to login
