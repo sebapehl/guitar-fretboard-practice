@@ -678,6 +678,7 @@
         }
 
         function submitAnswer(answer) {
+            logDebug(`Answer submitted: ${typeof answer === 'string' ? answer : answer.fret}`);
             let feedbackStringIdx, feedbackFret;
             if (state.mode === 'identify') {
                 feedbackStringIdx = state.currentChallenge.stringIdx;
@@ -700,14 +701,15 @@
 
             scoreEl.innerText = `Score: ${state.score}`;
             
-            if (state.status === 'finished') {
-                setTimeout(endGame, 500);
-            } else {
-                setTimeout(() => {
-                    state.nextChallenge();
+            // Wait for feedback to be visible, then move to next or end
+            setTimeout(() => {
+                const next = state.nextChallenge();
+                if (next) {
                     updateUI();
-                }, 500);
-            }
+                } else {
+                    endGame();
+                }
+            }, 500);
         }
 
         function updateUI() {
