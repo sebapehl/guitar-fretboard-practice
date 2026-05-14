@@ -260,7 +260,6 @@
             <li data-mode="identify">Fret ➔ Note</li>
             <li data-mode="locate">Note ➔ Fret</li>
             <li id="menu-leaderboard">Leaderboard</li>
-            <li id="menu-settings">Settings</li>
             <li id="menu-auth">Account</li>
         </ul>
     </nav>
@@ -288,6 +287,11 @@
 
             <div id="fretboard-ui"></div>
 
+            <div id="game-settings" style="margin: 15px auto; padding: 10px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 15px; font-size: 0.9rem; max-width: 400px;">
+                <label style="font-weight: 600; white-space: nowrap;">Fret Range: <span id="fret-range-val">0 - 12</span></label>
+                <input type="range" id="setting-fret-max" min="1" max="22" value="12" style="flex: 1;">
+            </div>
+
             <div class="note-buttons" id="note-input" style="display: none;">
                 <!-- Buttons injected by JS -->
             </div>
@@ -300,17 +304,6 @@
             </div>
 
             <div class="pb-display" id="pb-text"></div>
-        </div>
-
-        <div id="settings-view">
-            <h2>Settings</h2>
-            <div class="setting-group">
-                <label>Fret Range: <span id="fret-range-val">0 - 12</span></label>
-                <input type="range" id="setting-fret-max" min="1" max="22" value="12">
-            </div>
-            <div class="controls">
-                <button class="btn" id="save-settings-btn">Save & Close</button>
-            </div>
         </div>
 
         <div id="auth-view" style="display: none;">
@@ -923,14 +916,15 @@
             }
         }
 
-        // Settings View
-        document.getElementById('save-settings-btn').addEventListener('click', () => {
-            state.fretRange = [0, parseInt(document.getElementById('setting-fret-max').value)];
-            setAppMode(activeNavMode);
-        });
-
+        // Settings logic (now inline)
         document.getElementById('setting-fret-max').addEventListener('input', (e) => {
-            document.getElementById('fret-range-val').innerText = `0 - ${e.target.value}`;
+            const max = parseInt(e.target.value);
+            document.getElementById('fret-range-val').innerText = `0 - ${max}`;
+            state.fretRange = [0, max];
+            if (state.status !== 'playing') {
+                updatePBDisplay();
+                ui.render();
+            }
         });
 
         startBtn.addEventListener('click', startGame);
