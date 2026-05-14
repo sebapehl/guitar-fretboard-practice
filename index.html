@@ -259,6 +259,7 @@
             </div>
 
             <div class="feedback" id="feedback-text"></div>
+            <div id="db-status" style="font-size: 0.8rem; margin-top: 5px; min-height: 1rem;"></div>
 
             <div class="controls" id="main-controls">
                 <button class="btn" id="start-btn">Start 10-Note Sprint</button>
@@ -331,6 +332,7 @@
         const startBtn = document.getElementById('start-btn');
         const pbEl = document.getElementById('pb-text');
         const statsBar = document.getElementById('stats-bar');
+        const dbStatusEl = document.getElementById('db-status');
         const burgerBtn = document.getElementById('burger-btn');
         const sideNav = document.getElementById('side-nav');
         const navItems = document.querySelectorAll('nav li[data-mode]');
@@ -359,10 +361,28 @@
             setAppMode('playground');
 
             // Listen for auth changes
-            supabase.auth.onAuthStateChange((event, session) => {
+            supabase.auth.onAuthStateChange(async (event, session) => {
                 currentUser = session?.user || null;
+                if (currentUser) {
+                    await ensureProfileExists();
+                }
                 updateAuthUI();
             });
+        }
+
+        async function ensureProfileExists() {
+            if (!currentUser) return;
+            try {
+                // Try to upsert profile to ensure it exists for the foreign key
+                const { error } = await supabase.from('profiles').upsert({
+                    id: currentUser.id,
+                    username: currentUser.email.split('@')[0],
+                }, { onConflict: 'id' });
+                
+                if (error) console.error('Profile sync error:', error.message);
+            } catch (err) {
+                console.error('Profile sync failed:', err.message);
+            }
         }
 
         function updateAuthUI() {
@@ -654,6 +674,8 @@
         function startGame() {
             state.startRound();
             feedbackEl.innerText = '';
+            dbStatusEl.innerText = '';
+            dbStatusEl.style.color = 'inherit';
             startBtn.style.display = 'none';
             statsBar.classList.add('visible');
             updateUI();
@@ -698,6 +720,7 @@
 
             // Supabase Save
             if (currentUser) {
+                dbStatusEl.innerText = '☁️ Saving to cloud...';
                 try {
                     const { error } = await supabase.from('scores').insert({
                         user_id: currentUser.id,
@@ -708,8 +731,11 @@
                         history: state.history
                     });
                     if (error) throw error;
-                    console.log('Score saved to Supabase');
+                    dbStatusEl.innerText = '✅ Score synced to cloud';
+                    dbStatusEl.style.color = 'green';
                 } catch (err) {
+                    dbStatusEl.innerText = `❌ Cloud sync failed: ${err.message}`;
+                    dbStatusEl.style.color = 'red';
                     console.error('Failed to save score:', err.message);
                 }
             }
