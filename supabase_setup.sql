@@ -12,7 +12,7 @@ CREATE TABLE profiles (
 -- 2. Create Scores Table
 CREATE TABLE scores (
     id BIGSERIAL PRIMARY KEY,
-    user_id UUID REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+    user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
     mode TEXT NOT NULL, -- 'identify' or 'locate'
     fret_max INTEGER NOT NULL,
     total_time_ms FLOAT NOT NULL,
