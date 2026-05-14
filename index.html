@@ -362,6 +362,7 @@
         let activeNavMode = 'playground';
         let authMode = 'login';
         let currentUser = null;
+        let profileSynced = false;
 
         function logDebug(msg) {
             console.log(msg);
@@ -428,13 +429,13 @@
             setAppMode('playground');
 
             // Listen for auth changes
-            supabase.auth.onAuthStateChange(async (event, session) => {
+            supabase.auth.onAuthStateChange((event, session) => {
                 logDebug(`Auth event: ${event}`);
                 currentUser = session?.user || null;
-                if (currentUser) {
+                if (currentUser && !profileSynced) {
                     logDebug(`Logged in as: ${currentUser.email}`);
-                    await ensureProfileExists();
-                } else {
+                    ensureProfileExists(); // Run in background
+                } else if (!currentUser) {
                     logDebug('Not logged in');
                 }
                 updateAuthUI();
@@ -442,7 +443,7 @@
         }
 
         async function ensureProfileExists() {
-            if (!currentUser) return;
+            if (!currentUser || profileSynced) return;
             logDebug('Syncing profile...');
             try {
                 const { error } = await withTimeout(supabase.from('profiles').upsert({
@@ -453,6 +454,7 @@
                 if (error) {
                     logDebug(`Profile sync error: ${error.message}`);
                 } else {
+                    profileSynced = true;
                     logDebug('Profile synced');
                 }
             } catch (err) {
