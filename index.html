@@ -349,6 +349,9 @@
         <div class="final-stats" id="final-stats-text">
             Score: 10/10 in 12.34s
         </div>
+        <div id="rank-display" style="margin-bottom: 20px; font-size: 1.1rem; text-align: center; color: #fff;">
+            <!-- Rank info injected here -->
+        </div>
         <div class="controls">
             <button class="btn" id="play-again-btn">Play Again</button>
             <button class="btn btn-secondary" id="close-overlay-btn">Close</button>
@@ -415,6 +418,7 @@
         // Game Over DOM
         const gameOverScreen = document.getElementById('game-over-screen');
         const finalStatsText = document.getElementById('final-stats-text');
+        const rankDisplayEl = document.getElementById('rank-display');
         const playAgainBtn = document.getElementById('play-again-btn');
         const closeOverlayBtn = document.getElementById('close-overlay-btn');
 
@@ -764,6 +768,7 @@
             feedbackEl.innerText = '';
             dbStatusEl.innerText = '';
             dbStatusEl.style.color = 'inherit';
+            rankDisplayEl.innerHTML = '';
             startBtn.style.display = 'none';
             gameOverScreen.style.display = 'none';
             statsBar.classList.add('visible');
@@ -831,18 +836,25 @@
                 dbStatusEl.innerText = '☁️ Saving to cloud...';
                 logDebug('Attempting cloud save...');
                 try {
-                    const { error } = await withTimeout(supabase.from('scores').insert({
+                    const scoreData = {
                         user_id: currentUser.id,
                         mode: state.mode,
                         fret_max: state.fretRange[1],
                         total_time_ms: time * 1000,
                         accuracy: state.score / state.rounds,
                         history: state.history
-                    }));
+                    };
+
+                    const { error } = await withTimeout(supabase.from('scores').insert(scoreData));
                     if (error) throw error;
                     dbStatusEl.innerText = '✅ Score synced to cloud';
                     dbStatusEl.style.color = 'green';
                     logDebug('Cloud save SUCCESS');
+
+                    // If it was a perfect game, fetch rank
+                    if (state.score === state.rounds) {
+                        fetchRanks(scoreData.total_time_ms);
+                    }
                 } catch (err) {
                     dbStatusEl.innerText = `❌ Cloud sync failed: ${err.message}`;
                     dbStatusEl.style.color = 'red';
@@ -852,6 +864,47 @@
             } else {
                 logDebug('Cloud save SKIPPED: No user logged in');
                 dbStatusEl.innerText = '⚠️ Login to sync scores';
+            }
+        }
+
+        async function fetchRanks(timeMs) {
+            try {
+                logDebug('Fetching ranks...');
+                rankDisplayEl.innerHTML = '<p style="font-size: 0.8rem;">Calculating rank...</p>';
+
+                // 1. Global Rank (how many perfect scores are faster than this one)
+                const { count: globalFaster } = await withTimeout(supabase
+                    .from('scores')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('accuracy', 1)
+                    .eq('mode', state.mode)
+                    .eq('fret_max', state.fretRange[1])
+                    .lt('total_time_ms', timeMs));
+
+                // 2. Personal Rank (how many of your own perfect scores are faster)
+                const { count: personalFaster } = await withTimeout(supabase
+                    .from('scores')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('user_id', currentUser.id)
+                    .eq('accuracy', 1)
+                    .eq('mode', state.mode)
+                    .eq('fret_max', state.fretRange[1])
+                    .lt('total_time_ms', timeMs));
+
+                const globalRank = (globalFaster || 0) + 1;
+                const personalRank = (personalFaster || 0) + 1;
+
+                rankDisplayEl.innerHTML = `
+                    <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">
+                        Global Rank: #${globalRank}
+                    </div>
+                    <div style="font-size: 0.9rem; opacity: 0.9;">
+                        Personal Rank: #${personalRank}
+                    </div>
+                `;
+                logDebug(`Ranks fetched: Global #${globalRank}, Personal #${personalRank}`);
+            } catch (err) {
+                logDebug(`Rank fetch failed: ${err.message}`);
             }
         }
 
