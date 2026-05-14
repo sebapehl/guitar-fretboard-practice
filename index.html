@@ -471,7 +471,6 @@
 
         function showView(viewName) {
             gameView.style.display = viewName === 'game' ? 'block' : 'none';
-            settingsView.style.display = viewName === 'settings' ? 'block' : 'none';
             authView.style.display = viewName === 'auth' ? 'block' : 'none';
             profileView.style.display = viewName === 'profile' ? 'block' : 'none';
             leaderboardView.style.display = viewName === 'leaderboard' ? 'block' : 'none';
@@ -497,12 +496,6 @@
                 setAppMode(mode);
                 sideNav.classList.remove('open');
             });
-        });
-
-        document.getElementById('menu-settings').addEventListener('click', () => {
-            stopGame();
-            showView('settings');
-            sideNav.classList.remove('open');
         });
 
         document.getElementById('menu-leaderboard').addEventListener('click', () => {
