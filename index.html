@@ -377,9 +377,12 @@
         }
 
         // Navigation & Menu
-        burgerBtn.addEventListener('click', () => {
+        function toggleSideNav(e) {
+            e.stopPropagation();
             sideNav.classList.toggle('open');
-        });
+        }
+
+        burgerBtn.addEventListener('click', toggleSideNav);
 
         document.addEventListener('click', (e) => {
             if (!sideNav.contains(e.target) && !burgerBtn.contains(e.target)) {
