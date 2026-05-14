@@ -203,6 +203,22 @@
             color: var(--text-muted);
         }
 
+        #debug-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #222;
+            color: #0f0;
+            font-family: monospace;
+            font-size: 10px;
+            max-height: 100px;
+            overflow-y: auto;
+            padding: 5px;
+            z-index: 10000;
+            display: none;
+        }
+
         @media (max-width: 600px) {
             .note-buttons { grid-template-columns: repeat(4, 1fr); }
             .container { padding: 1rem; }
@@ -308,6 +324,8 @@
         </div>
     </div>
 
+    <div id="debug-console"></div>
+
     <script type="module">
         import { GameState, NOTES, STRINGS, getNoteAt } from './fretboard.js';
         import { FretboardUI } from './ui.js';
@@ -319,6 +337,22 @@
         let activeNavMode = 'playground';
         let authMode = 'login';
         let currentUser = null;
+
+        function logDebug(msg) {
+            console.log(msg);
+            const debugEl = document.getElementById('debug-console');
+            debugEl.style.display = 'block';
+            debugEl.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+            debugEl.scrollTop = debugEl.scrollHeight;
+        }
+
+        async function withTimeout(promise, ms = 10000) {
+            let timeoutId;
+            const timeout = new Promise((_, reject) => 
+                timeoutId = setTimeout(() => reject(new Error(`Timed out after ${ms/1000}s`)), ms)
+            );
+            return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
+        }
 
         // DOM Elements
         const gameView = document.getElementById('game-view');
@@ -354,6 +388,7 @@
         const leaderboardListEl = document.getElementById('leaderboard-list');
 
         function init() {
+            logDebug('Initializing app...');
             ui = new FretboardUI('fretboard-ui', state, handleFretClick);
             renderNoteButtons();
             loadPB();
@@ -362,9 +397,13 @@
 
             // Listen for auth changes
             supabase.auth.onAuthStateChange(async (event, session) => {
+                logDebug(`Auth event: ${event}`);
                 currentUser = session?.user || null;
                 if (currentUser) {
+                    logDebug(`Logged in as: ${currentUser.email}`);
                     await ensureProfileExists();
+                } else {
+                    logDebug('Not logged in');
                 }
                 updateAuthUI();
             });
@@ -372,16 +411,20 @@
 
         async function ensureProfileExists() {
             if (!currentUser) return;
+            logDebug('Syncing profile...');
             try {
-                // Try to upsert profile to ensure it exists for the foreign key
-                const { error } = await supabase.from('profiles').upsert({
+                const { error } = await withTimeout(supabase.from('profiles').upsert({
                     id: currentUser.id,
                     username: currentUser.email.split('@')[0],
-                }, { onConflict: 'id' });
+                }, { onConflict: 'id' }));
                 
-                if (error) console.error('Profile sync error:', error.message);
+                if (error) {
+                    logDebug(`Profile sync error: ${error.message}`);
+                } else {
+                    logDebug('Profile synced');
+                }
             } catch (err) {
-                console.error('Profile sync failed:', err.message);
+                logDebug(`Profile sync failed: ${err.message}`);
             }
         }
 
@@ -442,22 +485,25 @@
         });
 
         async function fetchLeaderboard() {
+            logDebug('Fetching leaderboard...');
             leaderboardListEl.innerHTML = '<p>Loading...</p>';
             try {
-                const { data, error } = await supabase
+                const { data, error } = await withTimeout(supabase
                     .from('scores')
                     .select('*, profiles(username)')
                     .eq('accuracy', 1) 
                     .order('total_time_ms', { ascending: true })
-                    .limit(10);
+                    .limit(10));
 
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
+                    logDebug('Leaderboard empty');
                     leaderboardListEl.innerHTML = '<p>No perfect scores yet!</p>';
                     return;
                 }
 
+                logDebug(`Leaderboard loaded: ${data.length} entries`);
                 leaderboardListEl.innerHTML = `
                     <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
                         <thead>
@@ -481,6 +527,7 @@
                     </table>
                 `;
             } catch (err) {
+                logDebug(`Leaderboard fetch failed: ${err.message}`);
                 leaderboardListEl.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
             }
         }
@@ -498,23 +545,26 @@
         });
 
         async function fetchMyScores() {
+            logDebug('Fetching my scores...');
             const listEl = document.getElementById('my-scores-list');
             listEl.innerHTML = 'Loading...';
             try {
-                const { data, error } = await supabase
+                const { data, error } = await withTimeout(supabase
                     .from('scores')
                     .select('*')
                     .eq('user_id', currentUser.id)
                     .eq('accuracy', 1)
                     .order('created_at', { ascending: false })
-                    .limit(5);
+                    .limit(5));
                 
                 if (error) throw error;
                 if (!data || data.length === 0) {
+                    logDebug('My scores empty');
                     listEl.innerHTML = '<p>No perfect scores yet. Go play!</p>';
                     return;
                 }
 
+                logDebug(`My scores loaded: ${data.length} entries`);
                 listEl.innerHTML = data.map(s => `
                     <div style="padding: 8px; border-bottom: 1px solid #eee;">
                         <strong>${s.mode}</strong> (0-${s.fret_max}): 
@@ -523,6 +573,7 @@
                     </div>
                 `).join('');
             } catch (err) {
+                logDebug(`My scores fetch failed: ${err.message}`);
                 listEl.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
             }
         }
