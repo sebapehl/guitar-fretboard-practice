@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
 // IMPORTANT: Replace these with your actual project URL and Anon Key 
 // from your Supabase Dashboard (Settings -> API)
