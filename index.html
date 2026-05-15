@@ -256,6 +256,32 @@
         .game-over-overlay h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); font-weight: 800; }
         .game-over-overlay .final-stats { font-size: 1.4rem; margin-bottom: 2.5rem; font-weight: 600; }
 
+        .leaderboard-filters {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+            background: #f1f3f5;
+            padding: 4px;
+            border-radius: 50px;
+        }
+        .filter-btn {
+            border: none;
+            background: transparent;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: 0.2s;
+        }
+        .filter-btn.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
         .mode-card {
             padding: 24px;
             background: var(--primary);
@@ -331,8 +357,16 @@
         </div>
 
         <div id="leaderboard-view" style="display: none;">
-            <h2>Leaderboard</h2>
-            <div id="leaderboard-list" style="margin: 20px 0; text-align: left;">
+            <h2 style="margin-bottom: 1.5rem;">Leaderboard</h2>
+            
+            <div class="leaderboard-filters">
+                <button class="filter-btn active" data-filter="all">Overall</button>
+                <button class="filter-btn" data-filter="day">Today</button>
+                <button class="filter-btn" data-filter="week">Week</button>
+                <button class="filter-btn" data-filter="month">Month</button>
+            </div>
+
+            <div id="leaderboard-list" style="margin: 10px 0; text-align: left;">
                 <p>Loading...</p>
             </div>
         </div>
@@ -597,22 +631,46 @@
             });
         });
 
-        async function fetchLeaderboard() {
-            logDebug('Fetching leaderboard...');
+        // Add listeners for leaderboard filters
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                fetchLeaderboard(btn.dataset.filter);
+            });
+        });
+
+        async function fetchLeaderboard(timeFilter = 'all') {
+            logDebug(`Fetching leaderboard (${timeFilter})...`);
             leaderboardListEl.innerHTML = '<p>Loading...</p>';
             try {
-                const { data, error } = await withTimeout(supabase
+                let query = supabase
                     .from('scores')
                     .select('*, profiles(username)')
                     .eq('accuracy', 1) 
                     .order('total_time_ms', { ascending: true })
-                    .limit(10));
+                    .limit(10);
+
+                if (timeFilter !== 'all') {
+                    const now = new Date();
+                    let startDate;
+                    if (timeFilter === 'day') {
+                        startDate = new Date(now.setHours(0,0,0,0));
+                    } else if (timeFilter === 'week') {
+                        startDate = new Date(now.setDate(now.getDate() - 7));
+                    } else if (timeFilter === 'month') {
+                        startDate = new Date(now.setMonth(now.getMonth() - 1));
+                    }
+                    query = query.gte('created_at', startDate.toISOString());
+                }
+
+                const { data, error } = await withTimeout(query);
 
                 if (error) throw error;
 
                 if (!data || data.length === 0) {
                     logDebug('Leaderboard empty');
-                    leaderboardListEl.innerHTML = '<p>No perfect scores yet!</p>';
+                    leaderboardListEl.innerHTML = '<p style="text-align: center; color: var(--text-muted); margin: 20px 0;">No perfect scores in this period yet!</p>';
                     return;
                 }
 
