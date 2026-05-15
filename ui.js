@@ -8,6 +8,7 @@ export class FretboardUI {
         this.fretWidth = 60;
         this.stringHeight = 25;
         this.margin = { top: 20, right: 20, bottom: 35, left: 50 };
+        this.highlights = []; // Array of { stringIdx, fret, color, label }
         this.render();
     }
 
@@ -91,12 +92,13 @@ export class FretboardUI {
                     html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="14" fill="none" stroke="#FF5A5F" stroke-width="2" opacity="0.3" />`;
                 }
 
-                // Permanent feedback dot (if exists)
-                if (this.feedbackPos && this.feedbackPos.stringIdx === s && this.feedbackPos.fret === f) {
+                // Multiple highlights (for theory/feedback)
+                const highlight = this.highlights.find(h => h.stringIdx === s && h.fret === f);
+                if (highlight) {
                     const fx = isNut ? this.margin.left - 25 : x + w/2;
-                    html += `<circle cx="${fx}" cy="${y + h/2}" r="14" fill="${this.feedbackPos.color}" />`;
-                    if (this.feedbackPos.label) {
-                        html += `<text x="${fx}" y="${y + h/2 + 4}" font-size="11" font-weight="800" text-anchor="middle" fill="white">${this.feedbackPos.label}</text>`;
+                    html += `<circle cx="${fx}" cy="${y + h/2}" r="14" fill="${highlight.color}" />`;
+                    if (highlight.label) {
+                        html += `<text x="${fx}" y="${y + h/2 + 4}" font-size="11" font-weight="800" text-anchor="middle" fill="white">${highlight.label}</text>`;
                     }
                 }
             }
@@ -135,16 +137,22 @@ export class FretboardUI {
     }
 
     showFeedback(stringIdx, fret, isCorrect, label = null) {
-        this.feedbackPos = {
+        const h = {
             stringIdx,
             fret,
             color: isCorrect ? '#00A699' : '#FF5A5F', // Accent Green or Airbnb Coral
             label
         };
+        this.highlights.push(h);
         this.render();
         setTimeout(() => {
-            this.feedbackPos = null;
+            this.highlights = this.highlights.filter(item => item !== h);
             this.render();
         }, 500);
+    }
+
+    setHighlights(highlights) {
+        this.highlights = highlights;
+        this.render();
     }
 }

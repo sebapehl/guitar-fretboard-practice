@@ -296,6 +296,33 @@
         .mode-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 90, 95, 0.25); }
         .mode-card:active { transform: scale(0.98); }
 
+        /* Theory Styles */
+        .hack-card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid #ebebeb;
+            text-align: left;
+            box-shadow: var(--shadow);
+        }
+        .hack-card h3 { 
+            color: var(--primary); 
+            font-size: 1.4rem; 
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .hack-card p { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px; }
+        .hack-fretboard {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 10px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+        }
+
         @media (max-width: 600px) {
             .note-buttons { grid-template-columns: repeat(4, 1fr); gap: 8px; }
             .container { padding: 1rem; border-radius: 0; box-shadow: none; border: none; background: transparent; }
@@ -354,6 +381,24 @@
             <h2>About Fretboard Mastery</h2>
             <p>A minimalist tool designed to help guitarists internalize the fretboard through gamified speed drills.</p>
             <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">Built with Vanilla JS and Supabase.</p>
+        </div>
+
+        <div id="theory-view" style="display: none;">
+            <h2 style="margin-bottom: 1.5rem;">Fretboard Hacks</h2>
+            
+            <div class="hack-card">
+                <h3>🐙 The Octopus (Octaves)</h3>
+                <p>Find one note, find them all. Tap any fret below to see its "Octopus" family spread across the neck using the <strong>2-over, 2-down</strong> rule.</p>
+                <div id="theory-fretboard-octopus" class="hack-fretboard"></div>
+                <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">
+                    Tip: Notice how the shape "shifts" forward by 1 fret when you reach the B-string!
+                </div>
+            </div>
+
+            <div class="hack-card" style="opacity: 0.6; pointer-events: none;">
+                <h3>🎯 The Big Note Discovery</h3>
+                <p>Coming soon: Learn to anchor your navigation using only the E and A strings.</p>
+            </div>
         </div>
 
         <div id="leaderboard-view" style="display: none;">
@@ -482,6 +527,7 @@
         const profileView = document.getElementById('profile-view');
         const aboutView = document.getElementById('about-view');
         const leaderboardView = document.getElementById('leaderboard-view');
+        const theoryView = document.getElementById('theory-view');
 
         const challengeEl = document.getElementById('challenge-text');
         const noteInputEl = document.getElementById('note-input');
@@ -586,6 +632,7 @@
             profileView.style.display = viewName === 'profile' ? 'block' : 'none';
             leaderboardView.style.display = viewName === 'leaderboard' ? 'block' : 'none';
             aboutView.style.display = viewName === 'about' ? 'block' : 'none';
+            theoryView.style.display = viewName === 'theory' ? 'block' : 'none';
         }
 
         // Navigation & Menu
@@ -615,9 +662,39 @@
         });
 
         document.getElementById('menu-theory').addEventListener('click', () => {
-            alert('Fretboard Theory coming soon!');
+            stopGame();
+            showView('theory');
+            initTheory();
             sideNav.classList.remove('open');
         });
+
+        let theoryOctopusUI;
+        function initTheory() {
+            if (!theoryOctopusUI) {
+                // Specialized UI for the Octopus hack
+                theoryOctopusUI = new FretboardUI('theory-fretboard-octopus', state, (s, f) => {
+                    const rootNote = getNoteAt(STRINGS[s].open, f);
+                    logDebug(`Theory: Finding octaves for ${rootNote}`);
+                    
+                    const octaves = [];
+                    // Find all instances of this note on the fretboard
+                    for (let stringIdx = 0; stringIdx < 6; stringIdx++) {
+                        for (let fret = 0; fret <= 12; fret++) {
+                            if (getNoteAt(STRINGS[stringIdx].open, fret) === rootNote) {
+                                octaves.push({
+                                    stringIdx,
+                                    fret,
+                                    color: stringIdx === s && fret === f ? 'var(--primary)' : 'var(--accent-green)',
+                                    label: rootNote
+                                });
+                            }
+                        }
+                    }
+                    theoryOctopusUI.setHighlights(octaves);
+                });
+            }
+            theoryOctopusUI.render();
+        }
 
         document.getElementById('menu-about').addEventListener('click', () => {
             stopGame();
