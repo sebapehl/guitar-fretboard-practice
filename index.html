@@ -368,10 +368,6 @@
                     <div style="font-size: 1.5rem; margin-bottom: 4px;">Note ➔ Fret</div>
                     <div style="font-size: 0.85rem; opacity: 0.8;">Find the given note on a specific string</div>
                 </div>
-                <div class="mode-card" data-mode="playground" style="background: #f7f7f7; color: var(--text); border-color: #ddd; box-shadow: none;">
-                    <div style="font-size: 1.5rem; margin-bottom: 4px;">Playground</div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted);">Explore the neck and learn note names</div>
-                </div>
                 
                 <button class="btn btn-secondary" id="landing-leaderboard-btn" style="margin-top: 10px;">View Global Leaderboard</button>
             </div>
@@ -949,24 +945,17 @@
             logDebug(`Setting app mode: ${mode}`);
             stopGame();
             activeNavMode = mode;
-            state.mode = mode === 'playground' ? 'identify' : mode;
+            state.mode = mode;
 
             showView('game');
 
-            if (mode === 'playground') {                statsBar.classList.remove('visible');
-                startBtn.style.display = 'none';
-                noteInputEl.style.display = 'none';
-                challengeEl.innerHTML = "Playground: Explore the neck!";
-                pbEl.style.display = 'none';
-            } else {
-                statsBar.classList.remove('visible');
-                startBtn.style.display = 'block';
-                startBtn.innerText = `Start ${mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret'} Sprint`;
-                noteInputEl.style.display = 'none';
-                challengeEl.innerHTML = mode === 'identify' ? "Identify the highlighted fret!" : "Locate the given note on the string!";
-                pbEl.style.display = 'block';
-                updatePBDisplay();
-            }
+            statsBar.classList.remove('visible');
+            startBtn.style.display = 'block';
+            startBtn.innerText = `Start ${mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret'} Sprint`;
+            noteInputEl.style.display = 'none';
+            challengeEl.innerHTML = mode === 'identify' ? "Identify the highlighted fret!" : "Locate the given note on the string!";
+            pbEl.style.display = 'block';
+            updatePBDisplay();
             feedbackEl.innerText = '';
             ui.render();
         }
@@ -985,10 +974,6 @@
             if (state.status === 'playing') {
                 if (state.mode !== 'locate') return;
                 submitAnswer({ stringIdx, fret });
-            } else {
-                // Free Play mode
-                const note = getNoteAt(STRINGS[stringIdx].open, fret);
-                ui.showFeedback(stringIdx, fret, true, note);
             }
         }
 
