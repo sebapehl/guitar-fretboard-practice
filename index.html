@@ -256,6 +256,20 @@
         .game-over-overlay h1 { font-size: 2.5rem; margin-bottom: 0.5rem; color: var(--primary); font-weight: 800; }
         .game-over-overlay .final-stats { font-size: 1.4rem; margin-bottom: 2.5rem; font-weight: 600; }
 
+        .mode-card {
+            padding: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid transparent;
+            text-align: left;
+            box-shadow: 0 4px 12px rgba(255, 90, 95, 0.15);
+        }
+        .mode-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 90, 95, 0.25); }
+        .mode-card:active { transform: scale(0.98); }
+
         @media (max-width: 600px) {
             .note-buttons { grid-template-columns: repeat(4, 1fr); gap: 8px; }
             .container { padding: 1rem; border-radius: 0; box-shadow: none; border: none; background: transparent; }
@@ -278,15 +292,45 @@
 
     <nav id="side-nav">
         <ul>
-            <li data-mode="playground">Playground</li>
-            <li data-mode="identify">Fret ➔ Note</li>
-            <li data-mode="locate">Note ➔ Fret</li>
-            <li id="menu-leaderboard">Leaderboard</li>
+            <li id="menu-home">Home</li>
             <li id="menu-auth">Account</li>
+            <li id="menu-theory">Fretboard Theory</li>
+            <li id="menu-about">About</li>
         </ul>
     </nav>
 
     <div class="container">
+        <div id="landing-view">
+            <h2 style="margin-bottom: 0.5rem;">Master the Fretboard</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Choose your practice mode to begin.</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div class="mode-card" data-mode="identify">
+                    <div style="font-size: 1.5rem; margin-bottom: 4px;">Fret ➔ Note</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8;">Identify the note at the highlighted fret</div>
+                </div>
+                <div class="mode-card" data-mode="locate">
+                    <div style="font-size: 1.5rem; margin-bottom: 4px;">Note ➔ Fret</div>
+                    <div style="font-size: 0.85rem; opacity: 0.8;">Find the given note on a specific string</div>
+                </div>
+                <div class="mode-card" data-mode="playground" style="background: #f7f7f7; color: var(--text); border-color: #ddd; box-shadow: none;">
+                    <div style="font-size: 1.5rem; margin-bottom: 4px;">Playground</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted);">Explore the neck and learn note names</div>
+                </div>
+                
+                <button class="btn btn-secondary" id="landing-leaderboard-btn" style="margin-top: 10px;">View Global Leaderboard</button>
+            </div>
+        </div>
+
+        <div id="about-view" style="display: none; text-align: left;">
+            <h2>About Fretboard Mastery</h2>
+            <p>A minimalist tool designed to help guitarists internalize the fretboard through gamified speed drills.</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">Built with Vanilla JS and Supabase.</p>
+            <div class="controls">
+                <button class="btn" id="about-back-btn">Back to Home</button>
+            </div>
+        </div>
+
         <div id="leaderboard-view" style="display: none;">
             <h2>Leaderboard</h2>
             <div id="leaderboard-list" style="margin: 20px 0; text-align: left;">
@@ -403,7 +447,13 @@
         }
 
         // DOM Elements
+        const landingView = document.getElementById('landing-view');
         const gameView = document.getElementById('game-view');
+        const leaderboardView = document.getElementById('leaderboard-view');
+        const authView = document.getElementById('auth-view');
+        const profileView = document.getElementById('profile-view');
+        const aboutView = document.getElementById('about-view');
+
         const settingsView = document.getElementById('settings-view');
         const challengeEl = document.getElementById('challenge-text');
         const noteInputEl = document.getElementById('note-input');
@@ -448,7 +498,7 @@
             renderNoteButtons();
             loadPB();
             updatePBDisplay();
-            setAppMode('playground');
+            showView('landing');
 
             // Listen for auth changes
             supabase.auth.onAuthStateChange((event, session) => {
@@ -494,10 +544,12 @@
         }
 
         function showView(viewName) {
+            landingView.style.display = viewName === 'landing' ? 'block' : 'none';
             gameView.style.display = viewName === 'game' ? 'block' : 'none';
             authView.style.display = viewName === 'auth' ? 'block' : 'none';
             profileView.style.display = viewName === 'profile' ? 'block' : 'none';
             leaderboardView.style.display = viewName === 'leaderboard' ? 'block' : 'none';
+            aboutView.style.display = viewName === 'about' ? 'block' : 'none';
         }
 
         // Navigation & Menu
@@ -514,23 +566,42 @@
             }
         });
 
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const mode = item.dataset.mode;
-                setAppMode(mode);
-                sideNav.classList.remove('open');
-            });
+        document.getElementById('menu-home').addEventListener('click', () => {
+            stopGame();
+            showView('landing');
+            sideNav.classList.remove('open');
         });
 
-        document.getElementById('menu-leaderboard').addEventListener('click', () => {
+        document.getElementById('menu-leaderboard')?.addEventListener('click', () => {
             stopGame();
             showView('leaderboard');
             fetchLeaderboard();
             sideNav.classList.remove('open');
         });
 
+        document.getElementById('landing-leaderboard-btn').addEventListener('click', () => {
+            showView('leaderboard');
+            fetchLeaderboard();
+        });
+
+        document.getElementById('menu-about').addEventListener('click', () => {
+            stopGame();
+            showView('about');
+            sideNav.classList.remove('open');
+        });
+
+        document.getElementById('about-back-btn').addEventListener('click', () => {
+            showView('landing');
+        });
+
+        document.querySelectorAll('.mode-card').forEach(card => {
+            card.addEventListener('click', () => {
+                setAppMode(card.dataset.mode);
+            });
+        });
+
         document.getElementById('close-leaderboard-btn').addEventListener('click', () => {
-            showView('game');
+            showView('landing');
         });
 
         async function fetchLeaderboard() {
