@@ -19,38 +19,42 @@ export class FretboardUI {
 
         let html = `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">`;
 
+        // Draw background wood-ish soft color
+        html += `<rect x="${this.margin.left}" y="${this.margin.top}" width="${(numFrets) * this.fretWidth}" height="${5 * this.stringHeight}" fill="#FAF3E0" rx="4" />`;
+
         // Draw frets
         for (let i = 0; i <= numFrets; i++) {
             const x = this.margin.left + i * this.fretWidth;
             const isNut = (i + minFret) === 0;
             html += `<line x1="${x}" y1="${this.margin.top}" x2="${x}" y2="${height - this.margin.bottom}" 
-                      stroke="${isNut ? 'black' : '#999'}" stroke-width="${isNut ? 5 : 2}" />`;
+                      stroke="${isNut ? '#484848' : '#D1D1D1'}" stroke-width="${isNut ? 6 : 3}" stroke-linecap="round" />`;
             
             // Fret numbers
             if (!isNut) {
-                html += `<text x="${x - this.fretWidth/2}" y="${height - 5}" font-size="12" text-anchor="middle" fill="#666">${i + minFret}</text>`;
+                html += `<text x="${x - this.fretWidth/2}" y="${height - 10}" font-size="12" font-weight="600" text-anchor="middle" fill="#717171">${i + minFret}</text>`;
             } else {
-                html += `<text x="${x - 25}" y="${height - 5}" font-size="10" font-weight="bold" text-anchor="middle" fill="#999">OPEN</text>`;
+                html += `<text x="${x - 30}" y="${height - 10}" font-size="10" font-weight="800" text-anchor="middle" fill="#FF5A5F">OPEN</text>`;
             }
         }
 
         // Draw strings
+        const stringColors = ["#8B7E74", "#A4907C", "#BC9F8B", "#C7B198", "#D9CAB3", "#EADBC8"];
         for (let i = 0; i < 6; i++) {
             const y = this.margin.top + i * this.stringHeight;
             html += `<line x1="${this.margin.left}" y1="${y}" x2="${width - this.margin.right}" y2="${y}" 
-                      stroke="#444" stroke-width="${1 + i * 0.3}" />`;
+                      stroke="${stringColors[i]}" stroke-width="${1.5 + i * 0.4}" />`;
         }
 
-        // Draw markers (3, 5, 7, 9, 12)
+        // Draw markers
         const markers = [3, 5, 7, 9, 12];
         markers.forEach(m => {
             if (m >= minFret && m <= maxFret) {
                 const x = this.margin.left + (m - minFret) * this.fretWidth - this.fretWidth / 2;
                 if (m === 12) {
-                    html += `<circle cx="${x}" cy="${this.margin.top + 1.5 * this.stringHeight}" r="5" fill="#ddd" />`;
-                    html += `<circle cx="${x}" cy="${this.margin.top + 3.5 * this.stringHeight}" r="5" fill="#ddd" />`;
+                    html += `<circle cx="${x}" cy="${this.margin.top + 1.5 * this.stringHeight}" r="4" fill="#E6D5B8" />`;
+                    html += `<circle cx="${x}" cy="${this.margin.top + 3.5 * this.stringHeight}" r="4" fill="#E6D5B8" />`;
                 } else {
-                    html += `<circle cx="${x}" cy="${this.margin.top + 2.5 * this.stringHeight}" r="5" fill="#ddd" />`;
+                    html += `<circle cx="${x}" cy="${this.margin.top + 2.5 * this.stringHeight}" r="4" fill="#E6D5B8" />`;
                 }
             }
         });
@@ -72,9 +76,9 @@ export class FretboardUI {
 
                 // Open string indicator circle
                 if (isNut) {
-                    html += `<circle cx="${this.margin.left - 20}" cy="${y + h/2}" r="10" 
-                              fill="${isChallengePos ? '#007bff' : 'white'}" 
-                              stroke="${isChallengePos ? '#007bff' : '#ccc'}" stroke-width="2" />`;
+                    html += `<circle cx="${this.margin.left - 25}" cy="${y + h/2}" r="11" 
+                              fill="${isChallengePos ? '#FF5A5F' : 'white'}" 
+                              stroke="${isChallengePos ? '#FF5A5F' : '#ddd'}" stroke-width="2" />`;
                 }
 
                 html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" 
@@ -83,22 +87,23 @@ export class FretboardUI {
                           style="cursor: pointer;" />`;
                 
                 if (isChallengePos && !isNut) {
-                    html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="8" fill="#007bff" opacity="0.6" />`;
+                    html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="10" fill="#FF5A5F" opacity="0.8" />`;
+                    html += `<circle cx="${x + w/2}" cy="${y + h/2}" r="14" fill="none" stroke="#FF5A5F" stroke-width="2" opacity="0.3" />`;
                 }
 
                 // Permanent feedback dot (if exists)
                 if (this.feedbackPos && this.feedbackPos.stringIdx === s && this.feedbackPos.fret === f) {
-                    const fx = isNut ? this.margin.left - 20 : x + w/2;
-                    html += `<circle cx="${fx}" cy="${y + h/2}" r="12" fill="${this.feedbackPos.color}" />`;
+                    const fx = isNut ? this.margin.left - 25 : x + w/2;
+                    html += `<circle cx="${fx}" cy="${y + h/2}" r="14" fill="${this.feedbackPos.color}" />`;
                     if (this.feedbackPos.label) {
-                        html += `<text x="${fx}" y="${y + h/2 + 4}" font-size="10" font-weight="bold" text-anchor="middle" fill="white">${this.feedbackPos.label}</text>`;
+                        html += `<text x="${fx}" y="${y + h/2 + 4}" font-size="11" font-weight="800" text-anchor="middle" fill="white">${this.feedbackPos.label}</text>`;
                     }
                 }
             }
         }
 
         // Hover dot (dynamic)
-        html += `<circle id="hover-dot" cx="0" cy="0" r="8" fill="rgba(0,123,255,0.3)" style="display: none; pointer-events: none;" />`;
+        html += `<circle id="hover-dot" cx="0" cy="0" r="10" fill="rgba(255, 90, 95, 0.15)" style="display: none; pointer-events: none;" />`;
 
         html += '</svg>';
         this.container.innerHTML = html;
@@ -109,7 +114,8 @@ export class FretboardUI {
         this.container.querySelectorAll('.fret-target').forEach(el => {
             el.addEventListener('mouseenter', (e) => {
                 const rect = e.target;
-                const cx = parseFloat(rect.getAttribute('x')) + parseFloat(rect.getAttribute('width')) / 2;
+                const isNut = parseInt(rect.dataset.fret) === 0;
+                const cx = isNut ? this.margin.left - 25 : parseFloat(rect.getAttribute('x')) + parseFloat(rect.getAttribute('width')) / 2;
                 const cy = parseFloat(rect.getAttribute('y')) + parseFloat(rect.getAttribute('height')) / 2;
                 hoverDot.setAttribute('cx', cx);
                 hoverDot.setAttribute('cy', cy);
@@ -132,7 +138,7 @@ export class FretboardUI {
         this.feedbackPos = {
             stringIdx,
             fret,
-            color: isCorrect ? '#28a745' : '#dc3545',
+            color: isCorrect ? '#00A699' : '#FF5A5F', // Accent Green or Airbnb Coral
             label
         };
         this.render();
