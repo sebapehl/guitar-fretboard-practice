@@ -695,8 +695,41 @@
         let theoryLadderUI;
 
         function initTheory() {
-            // ... (1. Octopus, 2. Anchors)
-...
+            // 1. Initialize Octopus Hack
+            if (!theoryOctopusUI) {
+                theoryOctopusUI = new FretboardUI('theory-fretboard-octopus', state, (s, f) => {
+                    const rootNote = getNoteAt(STRINGS[s].open, f);
+                    const octaves = [];
+                    for (let stringIdx = 0; stringIdx < 6; stringIdx++) {
+                        for (let fret = 0; fret <= 12; fret++) {
+                            if (getNoteAt(STRINGS[stringIdx].open, fret) === rootNote) {
+                                octaves.push({
+                                    stringIdx,
+                                    fret,
+                                    color: stringIdx === s && fret === f ? 'var(--primary)' : 'var(--accent-green)',
+                                    label: rootNote
+                                });
+                            }
+                        }
+                    }
+                    theoryOctopusUI.setHighlights(octaves);
+                });
+            }
+            theoryOctopusUI.render();
+
+            // 2. Initialize Anchor Strings Hack
+            if (!theoryAnchorsUI) {
+                theoryAnchorsUI = new FretboardUI('theory-fretboard-anchors', state, (s, f) => {
+                    if (s < 4) return; // Only allow E (5) and A (4) strings
+                    const rootNote = getNoteAt(STRINGS[s].open, f);
+                    const octS = s - 2;
+                    const octF = f + 2;
+                    if (octS >= 0) {
+                        theoryAnchorsUI.setHighlights([
+                            { stringIdx: s, fret: f, color: 'var(--primary)', label: rootNote },
+                            { stringIdx: octS, fret: octF, color: 'var(--accent-green)', label: rootNote }
+                        ]);
+                    }
                 });
             }
             theoryAnchorsUI.render();
@@ -718,13 +751,11 @@
                         }
                         return null;
                     }).filter(h => h !== null);
-                    
                     theoryLadderUI.setHighlights(highlights);
                 });
             }
             theoryLadderUI.render();
         }
-
         document.getElementById('menu-about').addEventListener('click', () => {
             stopGame();
             showView('about');
