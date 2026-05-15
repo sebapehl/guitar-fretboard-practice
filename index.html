@@ -295,7 +295,6 @@
 
     <nav id="side-nav">
         <ul>
-            <li id="menu-home">Home</li>
             <li id="menu-auth">Account</li>
             <li id="menu-theory">Fretboard Theory</li>
             <li id="menu-about">About</li>
@@ -574,12 +573,6 @@
             if (!sideNav.contains(e.target) && !burgerBtn.contains(e.target)) {
                 sideNav.classList.remove('open');
             }
-        });
-
-        document.getElementById('menu-home').addEventListener('click', () => {
-            stopGame();
-            showView('landing');
-            sideNav.classList.remove('open');
         });
 
         document.getElementById('menu-leaderboard')?.addEventListener('click', () => {
