@@ -328,18 +328,12 @@
             <h2>About Fretboard Mastery</h2>
             <p>A minimalist tool designed to help guitarists internalize the fretboard through gamified speed drills.</p>
             <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">Built with Vanilla JS and Supabase.</p>
-            <div class="controls">
-                <button class="btn" id="about-back-btn">Back to Home</button>
-            </div>
         </div>
 
         <div id="leaderboard-view" style="display: none;">
             <h2>Leaderboard</h2>
             <div id="leaderboard-list" style="margin: 20px 0; text-align: left;">
                 <p>Loading...</p>
-            </div>
-            <div class="controls">
-                <button class="btn" id="close-leaderboard-btn">Back to Game</button>
             </div>
         </div>
         <div id="game-view">
@@ -398,7 +392,6 @@
 
             <div class="controls" style="margin-top: 30px;">
                 <button class="btn btn-secondary" id="logout-btn">Logout</button>
-                <button class="btn" id="close-profile-btn">Back to Game</button>
             </div>
         </div>
     </div>
@@ -598,18 +591,10 @@
             sideNav.classList.remove('open');
         });
 
-        document.getElementById('about-back-btn').addEventListener('click', () => {
-            showView('landing');
-        });
-
         document.querySelectorAll('.mode-card').forEach(card => {
             card.addEventListener('click', () => {
                 setAppMode(card.dataset.mode);
             });
-        });
-
-        document.getElementById('close-leaderboard-btn').addEventListener('click', () => {
-            showView('landing');
         });
 
         async function fetchLeaderboard() {
@@ -762,10 +747,6 @@
 
         logoutBtn.addEventListener('click', async () => {
             await supabase.auth.signOut();
-            showView('landing');
-        });
-
-        document.getElementById('close-profile-btn').addEventListener('click', () => {
             showView('landing');
         });
 
