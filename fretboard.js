@@ -1,7 +1,7 @@
 export const NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 export const NOTE_VALUES = {
-    "C": 0, "C#": 1, "DB": 1, "D": 2, "D#": 3, "EB": 3, "E": 4, "F": 5, "F#": 6, "GB": 6, "G": 7, "G#": 8, "AB": 8, "A": 9, "A#": 10, "BB": 10, "B": 11
+    "C": 0, "C#": 1, "Db": 1, "DB": 1, "D": 2, "D#": 3, "Eb": 3, "EB": 3, "E": 4, "F": 5, "F#": 6, "Gb": 6, "GB": 6, "G": 7, "G#": 8, "Ab": 8, "AB": 8, "A": 9, "A#": 10, "Bb": 10, "BB": 10, "B": 11
 };
 
 const LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
@@ -12,7 +12,7 @@ const LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
  */
 export function getMajorScale(rootName) {
     const intervals = [0, 2, 4, 5, 7, 9, 11];
-    const rootValue = NOTE_VALUES[rootName.toUpperCase()];
+    const rootValue = NOTE_VALUES[rootName[0].toUpperCase() + rootName.slice(1).toLowerCase()] || NOTE_VALUES[rootName.toUpperCase()];
     if (rootValue === undefined) return null;
 
     // Find the starting letter index (0 for C, 1 for D, etc.)
@@ -36,8 +36,8 @@ export function getMajorScale(rootName) {
         let accidental = "";
         if (diff === 1) accidental = "#";
         if (diff === 2) accidental = "##";
-        if (diff === -1) accidental = "B";
-        if (diff === -2) accidental = "BB";
+        if (diff === -1) accidental = "b";
+        if (diff === -2) accidental = "bb";
 
         return targetLetter + accidental;
     });
