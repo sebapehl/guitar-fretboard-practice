@@ -4,6 +4,45 @@ export const NOTE_VALUES = {
     "C": 0, "C#": 1, "DB": 1, "D": 2, "D#": 3, "EB": 3, "E": 4, "F": 5, "F#": 6, "GB": 6, "G": 7, "G#": 8, "AB": 8, "A": 9, "A#": 10, "BB": 10, "B": 11
 };
 
+const LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
+
+/**
+ * Returns the correct spelling for a major scale starting on rootName.
+ * Follows the rule: each letter name A-G must be used exactly once.
+ */
+export function getMajorScale(rootName) {
+    const intervals = [0, 2, 4, 5, 7, 9, 11];
+    const rootValue = NOTE_VALUES[rootName.toUpperCase()];
+    if (rootValue === undefined) return null;
+
+    // Find the starting letter index (0 for C, 1 for D, etc.)
+    const rootLetter = rootName[0].toUpperCase();
+    let letterIdx = LETTERS.indexOf(rootLetter);
+
+    return intervals.map(interval => {
+        const targetValue = (rootValue + interval) % 12;
+        const targetLetter = LETTERS[letterIdx % 7];
+        letterIdx++;
+
+        // Find which accidental (if any) makes targetLetter match targetValue
+        // e.g. if targetValue is 10 (Bb/A#) and targetLetter is B, we need 'b'
+        const baseValue = NOTE_VALUES[targetLetter];
+        let diff = targetValue - baseValue;
+        
+        // Handle wrap-around (e.g. B to C)
+        if (diff > 6) diff -= 12;
+        if (diff < -6) diff += 12;
+
+        let accidental = "";
+        if (diff === 1) accidental = "#";
+        if (diff === 2) accidental = "##";
+        if (diff === -1) accidental = "B";
+        if (diff === -2) accidental = "BB";
+
+        return targetLetter + accidental;
+    });
+}
+
 export const STRINGS = [
     { name: "e", open: "E" },
     { name: "B", open: "B" },

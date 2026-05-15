@@ -510,7 +510,7 @@
     </div>
 
     <script type="module">
-        import { GameState, NOTES, STRINGS, getNoteAt } from './fretboard.js';
+        import { GameState, NOTES, STRINGS, getNoteAt, getMajorScale } from './fretboard.js';
         import { FretboardUI } from './ui.js';
         import { supabase } from './supabase.js';
 
@@ -733,20 +733,26 @@
             // 3. Initialize Major Scale Ladder Hack
             if (!theoryLadderUI) {
                 theoryLadderUI = new FretboardUI('theory-fretboard-ladder', state, (s, f) => {
+                    const rootNote = getNoteAt(STRINGS[s].open, f);
+                    const scaleNames = getMajorScale(rootNote);
                     const intervals = [0, 2, 4, 5, 7, 9, 11, 12];
+
                     const highlights = intervals.map(i => {
                         const targetFret = f + i;
                         if (targetFret <= 22) {
-                            const note = getNoteAt(STRINGS[s].open, targetFret);
+                            // Find which note of the scale this interval represents
+                            const scaleIdx = [0, 2, 4, 5, 7, 9, 11, 12].indexOf(i);
+                            const name = scaleIdx === 7 ? scaleNames[0] : scaleNames[scaleIdx];
                             return {
                                 stringIdx: s,
                                 fret: targetFret,
                                 color: i === 0 || i === 12 ? 'var(--primary)' : 'var(--accent-green)',
-                                label: note
+                                label: name
                             };
                         }
                         return null;
                     }).filter(h => h !== null);
+
                     theoryLadderUI.setHighlights(highlights);
                 });
             }
