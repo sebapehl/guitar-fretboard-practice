@@ -413,9 +413,13 @@
                 </div>
             </div>
 
-            <div class="hack-card" style="opacity: 0.6; pointer-events: none;">
+            <div class="hack-card">
                 <h3>🪜 The Major Scale Ladder</h3>
-                <p>Coming soon: Learn the "Whole-Whole-Half" pattern as a single-string ladder.</p>
+                <p>Every major scale follows a simple math formula: <strong>Whole-Whole-Half-Whole-Whole-Whole-Half</strong>. Tap any fret to build a scale "ladder" along that single string.</p>
+                <div id="theory-fretboard-ladder" class="hack-fretboard"></div>
+                <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">
+                    Visual: 2 frets (Whole), 2 frets (Whole), 1 fret (Half)...
+                </div>
             </div>
         </div>
 
@@ -688,49 +692,37 @@
 
         let theoryOctopusUI;
         let theoryAnchorsUI;
+        let theoryLadderUI;
 
         function initTheory() {
-            // 1. Initialize Octopus Hack
-            if (!theoryOctopusUI) {
-                theoryOctopusUI = new FretboardUI('theory-fretboard-octopus', state, (s, f) => {
-                    const rootNote = getNoteAt(STRINGS[s].open, f);
-                    const octaves = [];
-                    for (let stringIdx = 0; stringIdx < 6; stringIdx++) {
-                        for (let fret = 0; fret <= 12; fret++) {
-                            if (getNoteAt(STRINGS[stringIdx].open, fret) === rootNote) {
-                                octaves.push({
-                                    stringIdx,
-                                    fret,
-                                    color: stringIdx === s && fret === f ? 'var(--primary)' : 'var(--accent-green)',
-                                    label: rootNote
-                                });
-                            }
-                        }
-                    }
-                    theoryOctopusUI.setHighlights(octaves);
-                });
-            }
-            theoryOctopusUI.render();
-
-            // 2. Initialize Anchor Strings Hack
-            if (!theoryAnchorsUI) {
-                theoryAnchorsUI = new FretboardUI('theory-fretboard-anchors', state, (s, f) => {
-                    if (s < 4) return; // Only allow E (5) and A (4) strings
-                    
-                    const rootNote = getNoteAt(STRINGS[s].open, f);
-                    // Jump 2 strings higher (lower index) and 2 frets up
-                    const octS = s - 2;
-                    const octF = f + 2;
-
-                    if (octS >= 0) {
-                        theoryAnchorsUI.setHighlights([
-                            { stringIdx: s, fret: f, color: 'var(--primary)', label: rootNote },
-                            { stringIdx: octS, fret: octF, color: 'var(--accent-green)', label: rootNote }
-                        ]);
-                    }
+            // ... (1. Octopus, 2. Anchors)
+...
                 });
             }
             theoryAnchorsUI.render();
+
+            // 3. Initialize Major Scale Ladder Hack
+            if (!theoryLadderUI) {
+                theoryLadderUI = new FretboardUI('theory-fretboard-ladder', state, (s, f) => {
+                    const intervals = [0, 2, 4, 5, 7, 9, 11, 12];
+                    const highlights = intervals.map(i => {
+                        const targetFret = f + i;
+                        if (targetFret <= 22) {
+                            const note = getNoteAt(STRINGS[s].open, targetFret);
+                            return {
+                                stringIdx: s,
+                                fret: targetFret,
+                                color: i === 0 || i === 12 ? 'var(--primary)' : 'var(--accent-green)',
+                                label: note
+                            };
+                        }
+                        return null;
+                    }).filter(h => h !== null);
+                    
+                    theoryLadderUI.setHighlights(highlights);
+                });
+            }
+            theoryLadderUI.render();
         }
 
         document.getElementById('menu-about').addEventListener('click', () => {
