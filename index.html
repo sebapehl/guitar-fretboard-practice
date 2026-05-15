@@ -404,9 +404,18 @@
                 </div>
             </div>
 
+            <div class="hack-card">
+                <h3>🎯 The Anchor Strings (E & A)</h3>
+                <p>Don't memorize 132 notes. Just learn the <strong>Low E</strong> and <strong>A</strong> strings. These are your "GPS" anchors. Tap a note on the bottom two strings to see how they unlock the rest of the neck.</p>
+                <div id="theory-fretboard-anchors" class="hack-fretboard"></div>
+                <div style="font-size: 0.85rem; color: var(--accent-green); font-weight: 600;">
+                    Pro Tip: 100% of standard Power Chords use these two strings as their root!
+                </div>
+            </div>
+
             <div class="hack-card" style="opacity: 0.6; pointer-events: none;">
-                <h3>🎯 The Big Note Discovery</h3>
-                <p>Coming soon: Learn to anchor your navigation using only the E and A strings.</p>
+                <h3>🪜 The Major Scale Ladder</h3>
+                <p>Coming soon: Learn the "Whole-Whole-Half" pattern as a single-string ladder.</p>
             </div>
         </div>
 
@@ -678,15 +687,14 @@
         });
 
         let theoryOctopusUI;
+        let theoryAnchorsUI;
+
         function initTheory() {
+            // 1. Initialize Octopus Hack
             if (!theoryOctopusUI) {
-                // Specialized UI for the Octopus hack
                 theoryOctopusUI = new FretboardUI('theory-fretboard-octopus', state, (s, f) => {
                     const rootNote = getNoteAt(STRINGS[s].open, f);
-                    logDebug(`Theory: Finding octaves for ${rootNote}`);
-                    
                     const octaves = [];
-                    // Find all instances of this note on the fretboard
                     for (let stringIdx = 0; stringIdx < 6; stringIdx++) {
                         for (let fret = 0; fret <= 12; fret++) {
                             if (getNoteAt(STRINGS[stringIdx].open, fret) === rootNote) {
@@ -703,6 +711,26 @@
                 });
             }
             theoryOctopusUI.render();
+
+            // 2. Initialize Anchor Strings Hack
+            if (!theoryAnchorsUI) {
+                theoryAnchorsUI = new FretboardUI('theory-fretboard-anchors', state, (s, f) => {
+                    if (s < 4) return; // Only allow E (5) and A (4) strings
+                    
+                    const rootNote = getNoteAt(STRINGS[s].open, f);
+                    // Jump 2 strings higher (lower index) and 2 frets up
+                    const octS = s - 2;
+                    const octF = f + 2;
+
+                    if (octS >= 0) {
+                        theoryAnchorsUI.setHighlights([
+                            { stringIdx: s, fret: f, color: 'var(--primary)', label: rootNote },
+                            { stringIdx: octS, fret: octF, color: 'var(--accent-green)', label: rootNote }
+                        ]);
+                    }
+                });
+            }
+            theoryAnchorsUI.render();
         }
 
         document.getElementById('menu-about').addEventListener('click', () => {
