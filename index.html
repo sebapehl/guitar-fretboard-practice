@@ -287,7 +287,10 @@
             <span></span>
             <span></span>
         </div>
-        <h2>Fretboard Mastery</h2>
+        <h2 id="header-title" style="cursor: pointer; flex: 1;">Fretboard Mastery</h2>
+        <div id="header-home-btn" style="cursor: pointer; padding: 8px; border: 1px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: white;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF5A5F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
     </header>
 
     <nav id="side-nav">
@@ -465,7 +468,19 @@
         const statsBar = document.getElementById('stats-bar');
         const dbStatusEl = document.getElementById('db-status');
         const burgerBtn = document.getElementById('burger-btn');
+        const headerTitle = document.getElementById('header-title');
+        const headerHomeBtn = document.getElementById('header-home-btn');
         const sideNav = document.getElementById('side-nav');
+
+        // Header Home Actions
+        const goHome = () => {
+            stopGame();
+            showView('landing');
+            sideNav.classList.remove('open');
+        };
+
+        headerTitle.addEventListener('click', goHome);
+        headerHomeBtn.addEventListener('click', goHome);
 
         // Auth DOM
         const authForm = document.getElementById('auth-form');
@@ -577,6 +592,11 @@
         document.getElementById('landing-leaderboard-btn').addEventListener('click', () => {
             showView('leaderboard');
             fetchLeaderboard();
+        });
+
+        document.getElementById('menu-theory').addEventListener('click', () => {
+            alert('Fretboard Theory coming soon!');
+            sideNav.classList.remove('open');
         });
 
         document.getElementById('menu-about').addEventListener('click', () => {
