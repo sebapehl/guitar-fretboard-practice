@@ -749,24 +749,22 @@
 
         logoutBtn.addEventListener('click', async () => {
             await supabase.auth.signOut();
-            showView('game');
+            showView('landing');
         });
 
         document.getElementById('close-profile-btn').addEventListener('click', () => {
-            showView('game');
+            showView('landing');
         });
 
         function setAppMode(mode) {
+            logDebug(`Setting app mode: ${mode}`);
             stopGame();
             activeNavMode = mode;
-            state.mode = mode === 'playground' ? 'identify' : mode; 
-            
-            navItems.forEach(i => i.classList.toggle('active', i.dataset.mode === mode));
-            
+            state.mode = mode === 'playground' ? 'identify' : mode;
+
             showView('game');
 
-            if (mode === 'playground') {
-                statsBar.classList.remove('visible');
+            if (mode === 'playground') {                statsBar.classList.remove('visible');
                 startBtn.style.display = 'none';
                 noteInputEl.style.display = 'none';
                 challengeEl.innerHTML = "Playground: Explore the neck!";
