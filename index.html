@@ -554,26 +554,25 @@
 
                 logDebug(`Leaderboard loaded: ${data.length} entries`);
                 leaderboardListEl.innerHTML = `
-                    <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid #eee;">
-                                <th style="text-align: left; padding: 10px;">User</th>
-                                <th style="text-align: left; padding: 10px;">Mode</th>
-                                <th style="text-align: left; padding: 10px;">Range</th>
-                                <th style="text-align: right; padding: 10px;">Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${data.map(s => `
-                                <tr style="border-bottom: 1px solid #eee;">
-                                    <td style="padding: 10px;">${s.profiles?.username || 'Anonymous'}</td>
-                                    <td style="padding: 10px;">${s.mode}</td>
-                                    <td style="padding: 10px;">0-${s.fret_max}</td>
-                                    <td style="padding: 10px; text-align: right;">${(s.total_time_ms / 1000).toFixed(2)}s</td>
-                                </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                        ${data.map((s, idx) => `
+                            <div style="display: flex; align-items: center; padding: 16px; background: #fff; border: 1px solid #ebebeb; border-radius: 16px; transition: 0.2s;">
+                                <div style="width: 32px; height: 32px; background: ${idx < 3 ? 'var(--primary-soft)' : '#f7f7f7'}; color: ${idx < 3 ? 'var(--primary)' : '#717171'}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; margin-right: 16px; flex-shrink: 0;">
+                                    ${idx + 1}
+                                </div>
+                                <div style="flex: 1; text-align: left;">
+                                    <div style="font-weight: 800; font-size: 1rem; color: var(--text);">${s.profiles?.username || 'Anonymous'}</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                                        <span style="background: #f1f3f5; padding: 2px 8px; border-radius: 4px; margin-right: 4px;">${s.mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret'}</span>
+                                        <span style="background: #f1f3f5; padding: 2px 8px; border-radius: 4px;">0-${s.fret_max} frets</span>
+                                    </div>
+                                </div>
+                                <div style="text-align: right; font-weight: 800; font-size: 1.1rem; color: var(--accent-green); flex-shrink: 0;">
+                                    ${(s.total_time_ms / 1000).toFixed(2)}s
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
                 `;
             } catch (err) {
                 logDebug(`Leaderboard fetch failed: ${err.message}`);
