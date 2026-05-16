@@ -644,6 +644,14 @@
         }
 
         function showView(viewName) {
+            // Reset fret range to standard 0-12 on every view change
+            state.fretRange = [0, 12];
+            const fretSlider = document.getElementById('setting-fret-max');
+            if (fretSlider) {
+                fretSlider.value = 12;
+                document.getElementById('fret-range-val').innerText = '0 - 12';
+            }
+
             landingView.style.display = viewName === 'landing' ? 'block' : 'none';
             gameView.style.display = viewName === 'game' ? 'block' : 'none';
             authView.style.display = viewName === 'auth' ? 'block' : 'none';
