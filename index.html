@@ -523,15 +523,19 @@
             constructor() {
                 this.sampler = new Tone.Sampler({
                     urls: {
-                        "E2": "E2.mp3", "A2": "A2.mp3", "D3": "D3.mp3", 
-                        "G3": "G3.mp3", "B3": "B3.mp3", "E4": "E4.mp3",
-                        "A3": "A3.mp3", "D4": "D4.mp3", "G4": "G4.mp3"
+                        "E2": "E2.mp3", "G2": "Gs2.mp3", "A2": "A2.mp3",
+                        "C3": "C3.mp3", "D3": "D3.mp3", "E3": "E3.mp3", "G3": "G3.mp3", "A3": "A3.mp3",
+                        "C4": "C4.mp3", "D4": "D4.mp3", "E4": "E4.mp3", "G4": "G4.mp3", "A4": "A4.mp3",
+                        "C5": "C5.mp3", "D5": "D5.mp3", "E5": "E5.mp3", "G5": "G5.mp3", "A5": "A5.mp3",
+                        "C6": "C6.mp3"
                     },
                     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-electric/",
-                    release: 1,
+                    release: 1.5,
                     onload: () => logDebug('Guitar samples loaded')
                 }).toDestination();
                 this.audioStarted = false;
+                this.samplesLoaded = false;
+                this.sampler.onload = () => { this.samplesLoaded = true; };
             }
 
             async start() {
@@ -547,9 +551,17 @@
 
             play(stringIdx, fret) {
                 this.start();
+                if (!this.samplesLoaded) {
+                    logDebug('Audio still loading...');
+                    return;
+                }
                 const noteInfo = getNoteInfo(stringIdx, fret);
                 const toneNote = noteInfo.full.replace('#', 's');
-                this.sampler.triggerAttackRelease(toneNote, "2n");
+                try {
+                    this.sampler.triggerAttackRelease(toneNote, "2n");
+                } catch (e) {
+                    console.warn(`Could not play note: ${toneNote}`, e);
+                }
             }
         }
 
@@ -1027,6 +1039,11 @@
 
         function handleFretClick(stringIdx, fret) {
             guitar.play(stringIdx, fret);
+            
+            // Visual feedback (always show the note name on tap)
+            const note = getNoteAt(STRINGS[stringIdx].open, fret);
+            ui.showFeedback(stringIdx, fret, true, note);
+
             if (state.status === 'playing') {
                 if (state.mode !== 'locate') return;
                 submitAnswer({ stringIdx, fret });
