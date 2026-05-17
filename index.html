@@ -526,9 +526,7 @@
             constructor() {
                 this.sampler = new Tone.Sampler({
                     urls: {
-                        "E2": "E2.mp3", "G2": "G2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3", "G3": "G3.mp3",
-                        "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "E4": "E4.mp3", "F#4": "Fs4.mp3", "G4": "G4.mp3", "A4": "A4.mp3",
-                        "C5": "C5.mp3", "D#5": "Ds5.mp3", "E5": "E5.mp3", "G5": "G5.mp3", "A5": "A5.mp3", "C6": "C6.mp3"
+                        "E2": "E2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "A3": "A3.mp3", "C4": "C4.mp3"
                     },
                     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-electric/",
                     onload: () => {
@@ -563,14 +561,18 @@
             }
 
             play(stringIdx, fret) {
-                if (!this.enabled || !this.samplesLoaded) return;
                 const noteInfo = getNoteInfo(stringIdx, fret);
                 // String 1 is high e, String 6 is low E
                 logDebug(`🔊 Playing: ${noteInfo.full} (Str ${stringIdx + 1}, Fret ${fret})`);
+                this.playNote(noteInfo.full);
+            }
+
+            playNote(noteName) {
+                if (!this.enabled || !this.samplesLoaded) return;
                 try {
-                    this.sampler.triggerAttackRelease(noteInfo.full, "2n");
+                    this.sampler.triggerAttackRelease(noteName, "2n");
                 } catch (e) {
-                    console.warn(`Audio play failed: ${noteInfo.full}`, e);
+                    console.warn(`Audio play failed: ${noteName}`, e);
                 }
             }
         }
@@ -1048,15 +1050,9 @@
 
             noteInputEl.querySelectorAll('.note-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    try {
-                        if (guitar.enabled && state.currentChallenge) {
-                            // Get the octave of the currently highlighted fret challenge
-                            const challengeInfo = getNoteInfo(state.currentChallenge.stringIdx, state.currentChallenge.fret);
-                            const toneNote = `${btn.dataset.note}${challengeInfo.octave}`;
-                            guitar.sampler.triggerAttackRelease(toneNote, "2n");
-                        }
-                    } catch (e) {
-                        console.warn('Audio button play failed', e);
+                    if (guitar.enabled && state.currentChallenge) {
+                        const challengeInfo = getNoteInfo(state.currentChallenge.stringIdx, state.currentChallenge.fret);
+                        guitar.playNote(`${btn.dataset.note}${challengeInfo.octave}`);
                     }
                     submitAnswer(btn.dataset.note);
                 });
