@@ -540,34 +540,43 @@
                 this.sampler.volume.value = -2;
                 this.audioStarted = false;
                 this.samplesLoaded = false;
+                this.enabled = false;
             }
 
-            async start() {
-                if (this.audioStarted) return;
-                try {
-                    await Tone.start();
-                    if (Tone.context.state !== 'running') {
-                        await Tone.context.resume();
+            async toggle() {
+                if (!this.audioStarted) {
+                    try {
+                        await Tone.start();
+                        if (Tone.context.state !== 'running') {
+                            await Tone.context.resume();
+                        }
+                        this.audioStarted = true;
+                        logDebug('Audio context initialized');
+                    } catch (e) {
+                        logDebug(`Audio start failed: ${e.message}`);
+                        return;
                     }
-                    this.audioStarted = true;
-                    logDebug('Audio context started');
-                    document.getElementById('sound-toggle-btn').innerText = '🔊 Sound: On';
-                    document.getElementById('sound-toggle-btn').style.background = 'var(--primary-soft)';
-                    document.getElementById('sound-toggle-btn').style.color = 'var(--primary)';
-                } catch (e) {
-                    logDebug(`Audio start failed: ${e.message}`);
+                }
+
+                this.enabled = !this.enabled;
+                const btn = document.getElementById('sound-toggle-btn');
+                if (this.enabled) {
+                    btn.innerText = '🔊 Sound: On';
+                    btn.style.background = 'var(--primary-soft)';
+                    btn.style.color = 'var(--primary)';
+                    logDebug('Sound enabled');
+                } else {
+                    btn.innerText = '🔈 Sound: Off';
+                    btn.style.background = '#f1f3f5';
+                    btn.style.color = 'var(--text)';
+                    logDebug('Sound disabled');
                 }
             }
 
             play(stringIdx, fret) {
-                if (!this.audioStarted) return; // Don't play if not explicitly enabled
-                if (!this.samplesLoaded) {
-                    logDebug('Audio still loading...');
-                    return;
-                }
+                if (!this.enabled || !this.samplesLoaded) return;
                 const noteInfo = getNoteInfo(stringIdx, fret);
                 try {
-                    // Tone.Sampler will pitch shift if exact note isn't in 'urls'
                     this.sampler.triggerAttackRelease(noteInfo.full, "2n");
                 } catch (e) {
                     console.warn(`Could not play: ${noteInfo.full}`, e);
@@ -633,7 +642,7 @@
         headerHomeBtn.addEventListener('click', goHome);
 
         document.getElementById('sound-toggle-btn').addEventListener('click', () => {
-            guitar.start();
+            guitar.toggle();
         });
 
         // Navigation & Menu
