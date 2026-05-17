@@ -44,13 +44,26 @@ export function getMajorScale(rootName) {
 }
 
 export const STRINGS = [
-    { name: "e", open: "E" },
-    { name: "B", open: "B" },
-    { name: "G", open: "G" },
-    { name: "D", open: "D" },
-    { name: "A", open: "A" },
-    { name: "E", open: "E" }
+    { name: "e", open: "E", midi: 64 }, // E4
+    { name: "B", open: "B", midi: 59 }, // B3
+    { name: "G", open: "G", midi: 55 }, // G3
+    { name: "D", open: "D", midi: 50 }, // D3
+    { name: "A", open: "A", midi: 45 }, // A2
+    { name: "E", open: "E", midi: 40 }  // E2
 ];
+
+/**
+ * Returns the note name and octave for a given string and fret.
+ * e.g. { name: "C", octave: 4, full: "C4" }
+ */
+export function getNoteInfo(stringIdx, fret) {
+    const baseMidi = STRINGS[stringIdx].midi;
+    const midi = baseMidi + fret;
+    const octave = Math.floor(midi / 12) - 1;
+    const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const name = noteNames[midi % 12];
+    return { name, octave, full: `${name}${octave}` };
+}
 
 export function getNoteAt(stringOpen, fret) {
     const openValue = NOTE_VALUES[stringOpen];
