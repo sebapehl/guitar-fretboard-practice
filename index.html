@@ -342,6 +342,9 @@
             <span></span>
         </div>
         <h2 id="header-title" style="cursor: pointer; flex: 1;">Fretboard Mastery</h2>
+        <button id="sound-toggle-btn" class="btn btn-secondary" style="margin-right: 15px; padding: 8px 16px; border-radius: 50px; font-size: 0.8rem; background: #f1f3f5; color: var(--text);">
+            🔈 Sound: Off
+        </button>
         <div id="header-home-btn" style="cursor: pointer; padding: 8px; border: 1px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: white;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF5A5F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
@@ -523,44 +526,51 @@
             constructor() {
                 this.sampler = new Tone.Sampler({
                     urls: {
-                        "E2": "E2.mp3", "G2": "Gs2.mp3", "A2": "A2.mp3",
-                        "C3": "C3.mp3", "D3": "D3.mp3", "E3": "E3.mp3", "G3": "G3.mp3", "A3": "A3.mp3",
-                        "C4": "C4.mp3", "D4": "D4.mp3", "E4": "E4.mp3", "G4": "G4.mp3", "A4": "A4.mp3",
-                        "C5": "C5.mp3", "D5": "D5.mp3", "E5": "E5.mp3", "G5": "G5.mp3", "A5": "A5.mp3",
-                        "C6": "C6.mp3"
+                        "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3",
+                        "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3",
+                        "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3",
+                        "A5": "A5.mp3", "C6": "C6.mp3"
                     },
                     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-electric/",
-                    release: 1.5,
-                    onload: () => logDebug('Guitar samples loaded')
+                    onload: () => {
+                        this.samplesLoaded = true;
+                        logDebug('Guitar samples loaded');
+                    }
                 }).toDestination();
+                this.sampler.volume.value = -2;
                 this.audioStarted = false;
                 this.samplesLoaded = false;
-                this.sampler.onload = () => { this.samplesLoaded = true; };
             }
 
             async start() {
                 if (this.audioStarted) return;
                 try {
                     await Tone.start();
+                    if (Tone.context.state !== 'running') {
+                        await Tone.context.resume();
+                    }
                     this.audioStarted = true;
                     logDebug('Audio context started');
+                    document.getElementById('sound-toggle-btn').innerText = '🔊 Sound: On';
+                    document.getElementById('sound-toggle-btn').style.background = 'var(--primary-soft)';
+                    document.getElementById('sound-toggle-btn').style.color = 'var(--primary)';
                 } catch (e) {
-                    console.error('Audio start failed', e);
+                    logDebug(`Audio start failed: ${e.message}`);
                 }
             }
 
             play(stringIdx, fret) {
-                this.start();
+                if (!this.audioStarted) return; // Don't play if not explicitly enabled
                 if (!this.samplesLoaded) {
                     logDebug('Audio still loading...');
                     return;
                 }
                 const noteInfo = getNoteInfo(stringIdx, fret);
-                const toneNote = noteInfo.full.replace('#', 's');
                 try {
-                    this.sampler.triggerAttackRelease(toneNote, "2n");
+                    // Tone.Sampler will pitch shift if exact note isn't in 'urls'
+                    this.sampler.triggerAttackRelease(noteInfo.full, "2n");
                 } catch (e) {
-                    console.warn(`Could not play note: ${toneNote}`, e);
+                    console.warn(`Could not play: ${noteInfo.full}`, e);
                 }
             }
         }
@@ -622,7 +632,11 @@
         headerTitle.addEventListener('click', goHome);
         headerHomeBtn.addEventListener('click', goHome);
 
-        // Auth DOM
+        document.getElementById('sound-toggle-btn').addEventListener('click', () => {
+            guitar.start();
+        });
+
+        // Navigation & Menu
         const authForm = document.getElementById('auth-form');
         const authEmailInput = document.getElementById('auth-email');
         const authPasswordInput = document.getElementById('auth-password');
