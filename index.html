@@ -1121,11 +1121,9 @@
                 challengeEl.onclick = null;
                 noteInputEl.style.display = 'grid';
             } else {
-                challengeEl.innerHTML = `Find&nbsp;<strong>${state.currentChallenge.correctNote}</strong>&nbsp;on string&nbsp;<strong>${state.currentChallenge.stringName}</strong> 🔊`;
-                challengeEl.style.cursor = 'pointer';
-                challengeEl.onclick = () => {
-                    guitar.play(state.currentChallenge.stringIdx, state.currentChallenge.fret);
-                };
+                challengeEl.innerHTML = `Find&nbsp;<strong>${state.currentChallenge.correctNote}</strong>&nbsp;on string&nbsp;<strong>${state.currentChallenge.stringName}</strong>`;
+                challengeEl.style.cursor = 'default';
+                challengeEl.onclick = null;
                 noteInputEl.style.display = 'none';
             }
             ui.render();
