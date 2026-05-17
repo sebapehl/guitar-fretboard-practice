@@ -7,7 +7,7 @@ export class FretboardUI {
         this.onFretClick = onFretClick;
         this.fretWidth = 60;
         this.stringHeight = 25;
-        this.margin = { top: 20, right: 20, bottom: 35, left: 50 };
+        this.margin = { top: 35, right: 20, bottom: 35, left: 50 };
         this.highlights = []; // Array of { stringIdx, fret, color, label }
         this.render();
     }
@@ -83,7 +83,7 @@ export class FretboardUI {
                 }
 
                 html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" 
-                          fill="transparent" 
+                          fill="white" fill-opacity="0" 
                           class="fret-target" data-string="${s}" data-fret="${f}" 
                           style="cursor: pointer;" />`;
                 
