@@ -526,10 +526,10 @@
             constructor() {
                 this.sampler = new Tone.Sampler({
                     urls: {
-                        "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3",
-                        "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3",
-                        "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3",
-                        "A5": "A5.mp3", "C6": "C6.mp3"
+                        "E2": "E2.mp3", "A2": "A2.mp3", "C3": "C3.mp3", "D#3": "Ds3.mp3", "F#3": "Fs3.mp3",
+                        "E3": "E3.mp3", "A3": "A3.mp3", "C4": "C4.mp3", "D#4": "Ds4.mp3", "F#4": "Fs4.mp3",
+                        "E4": "E4.mp3", "A4": "A4.mp3", "C5": "C5.mp3", "D#5": "Ds5.mp3", "F#5": "Fs5.mp3",
+                        "E5": "E5.mp3", "A5": "A5.mp3", "C6": "C6.mp3"
                     },
                     baseUrl: "https://nbrosowsky.github.io/tonejs-instruments/samples/guitar-electric/",
                     onload: () => {
@@ -1047,8 +1047,10 @@
 
             noteInputEl.querySelectorAll('.note-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    if (guitar.enabled) {
-                        const toneNote = `${btn.dataset.note}3`;
+                    if (guitar.enabled && state.currentChallenge) {
+                        // Get the octave of the currently highlighted fret challenge
+                        const challengeInfo = getNoteInfo(state.currentChallenge.stringIdx, state.currentChallenge.fret);
+                        const toneNote = `${btn.dataset.note}${challengeInfo.octave}`;
                         guitar.sampler.triggerAttackRelease(toneNote, "2n");
                     }
                     submitAnswer(btn.dataset.note);
