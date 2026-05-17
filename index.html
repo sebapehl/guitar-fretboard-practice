@@ -1051,15 +1051,20 @@
         }
 
         function renderNoteButtons() {
-            noteInputEl.innerHTML = NOTES.map(n => 
+            noteInputEl.innerHTML = NOTES.map(n =>
                 `<button class="note-btn" data-note="${n}">${n}</button>`
             ).join('');
 
             noteInputEl.querySelectorAll('.note-btn').forEach(btn => {
-                btn.addEventListener('click', () => submitAnswer(btn.dataset.note));
+                btn.addEventListener('click', () => {
+                    if (guitar.enabled) {
+                        const toneNote = `${btn.dataset.note}3`.replace('#', 's');
+                        guitar.sampler.triggerAttackRelease(toneNote, "2n");
+                    }
+                    submitAnswer(btn.dataset.note);
+                });
             });
         }
-
         function handleFretClick(stringIdx, fret) {
             guitar.play(stringIdx, fret);
             
@@ -1112,9 +1117,15 @@
             roundEl.innerText = `Round ${state.currentRound}/${state.rounds}`;
             if (state.mode === 'identify') {
                 challengeEl.innerHTML = `What note is this?`;
+                challengeEl.style.cursor = 'default';
+                challengeEl.onclick = null;
                 noteInputEl.style.display = 'grid';
             } else {
-                challengeEl.innerHTML = `Find&nbsp;<strong>${state.currentChallenge.correctNote}</strong>&nbsp;on string&nbsp;<strong>${state.currentChallenge.stringName}</strong>`;
+                challengeEl.innerHTML = `Find&nbsp;<strong>${state.currentChallenge.correctNote}</strong>&nbsp;on string&nbsp;<strong>${state.currentChallenge.stringName}</strong> 🔊`;
+                challengeEl.style.cursor = 'pointer';
+                challengeEl.onclick = () => {
+                    guitar.play(state.currentChallenge.stringIdx, state.currentChallenge.fret);
+                };
                 noteInputEl.style.display = 'none';
             }
             ui.render();
