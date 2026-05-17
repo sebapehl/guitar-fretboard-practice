@@ -117,12 +117,18 @@ export class GameState {
             return null;
         }
 
-        const stringIdx = Math.floor(Math.random() * (this.stringRange[1] - this.stringRange[0] + 1)) + this.stringRange[0];
-        const fret = Math.floor(Math.random() * (this.fretRange[1] - this.fretRange[0] + 1)) + this.fretRange[0];
+        const lastNote = this.currentChallenge ? this.currentChallenge.correctNote : null;
+        let stringIdx, fret, correctNote;
         
-        const stringObj = STRINGS[stringIdx];
-        const correctNote = getNoteAt(stringObj.open, fret);
+        let attempts = 0;
+        do {
+            stringIdx = Math.floor(Math.random() * (this.stringRange[1] - this.stringRange[0] + 1)) + this.stringRange[0];
+            fret = Math.floor(Math.random() * (this.fretRange[1] - this.fretRange[0] + 1)) + this.fretRange[0];
+            correctNote = getNoteAt(STRINGS[stringIdx].open, fret);
+            attempts++;
+        } while (correctNote === lastNote && attempts < 20);
 
+        const stringObj = STRINGS[stringIdx];
         this.currentChallenge = {
             stringIdx,
             stringName: stringObj.name,

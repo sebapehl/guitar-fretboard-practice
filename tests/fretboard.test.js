@@ -56,4 +56,17 @@ describe('GameState', () => {
             expect(game.currentChallenge.fret).toBeLessThanOrEqual(3);
         }
     });
+
+    it('should not ask the same note twice in a row', () => {
+        game.rounds = 100; // Large sample
+        game.startRound();
+        let lastNote = game.currentChallenge.correctNote;
+        
+        for (let i = 1; i < 100; i++) {
+            const challenge = game.nextChallenge();
+            if (!challenge) break;
+            expect(challenge.correctNote).not.toBe(lastNote);
+            lastNote = challenge.correctNote;
+        }
+    });
 });
