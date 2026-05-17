@@ -1058,7 +1058,7 @@
             noteInputEl.querySelectorAll('.note-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     if (guitar.enabled) {
-                        const toneNote = `${btn.dataset.note}3`.replace('#', 's');
+                        const toneNote = `${btn.dataset.note}3`;
                         guitar.sampler.triggerAttackRelease(toneNote, "2n");
                     }
                     submitAnswer(btn.dataset.note);
