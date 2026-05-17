@@ -57,6 +57,7 @@ export const STRINGS = [
  * e.g. { name: "C", octave: 4, full: "C4" }
  */
 export function getNoteInfo(stringIdx, fret) {
+    if (stringIdx < 0 || stringIdx >= STRINGS.length) return { name: "?", octave: 0, full: "C4" };
     const baseMidi = STRINGS[stringIdx].midi;
     const midi = baseMidi + fret;
     const octave = Math.floor(midi / 12) - 1;

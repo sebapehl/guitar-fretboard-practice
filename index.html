@@ -1048,11 +1048,15 @@
 
             noteInputEl.querySelectorAll('.note-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
-                    if (guitar.enabled && state.currentChallenge) {
-                        // Get the octave of the currently highlighted fret challenge
-                        const challengeInfo = getNoteInfo(state.currentChallenge.stringIdx, state.currentChallenge.fret);
-                        const toneNote = `${btn.dataset.note}${challengeInfo.octave}`;
-                        guitar.sampler.triggerAttackRelease(toneNote, "2n");
+                    try {
+                        if (guitar.enabled && state.currentChallenge) {
+                            // Get the octave of the currently highlighted fret challenge
+                            const challengeInfo = getNoteInfo(state.currentChallenge.stringIdx, state.currentChallenge.fret);
+                            const toneNote = `${btn.dataset.note}${challengeInfo.octave}`;
+                            guitar.sampler.triggerAttackRelease(toneNote, "2n");
+                        }
+                    } catch (e) {
+                        console.warn('Audio button play failed', e);
                     }
                     submitAnswer(btn.dataset.note);
                 });

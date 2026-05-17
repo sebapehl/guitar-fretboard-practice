@@ -60,7 +60,7 @@ export class FretboardUI {
             }
         });
 
-        // Draw dynamic highlights (for challenge and feedback)
+        // Draw visible indicators (Challenge dots, Theory dots, and Open String circles)
         for (let s = 0; s < 6; s++) {
             for (let f = minFret; f <= maxFret; f++) {
                 const isNut = f === 0;
@@ -75,14 +75,19 @@ export class FretboardUI {
                                      this.game.currentChallenge.stringIdx === s && 
                                      this.game.currentChallenge.fret === f;
 
-                if (isChallengePos) {
-                    const cx = isNut ? this.margin.left - 25 : x + w/2;
-                    html += `<circle cx="${cx}" cy="${y + h/2}" r="11" fill="${isNut ? 'white' : '#FF5A5F'}" stroke="#FF5A5F" stroke-width="2" pointer-events="none" />`;
-                    if (!isNut) {
-                        html += `<circle cx="${cx}" cy="${y + h/2}" r="14" fill="none" stroke="#FF5A5F" stroke-width="2" opacity="0.3" pointer-events="none" />`;
-                    }
+                // Always-visible Open String indicator
+                if (isNut) {
+                    html += `<circle cx="${this.margin.left - 25}" cy="${y + h/2}" r="11" 
+                              fill="${isChallengePos ? '#FF5A5F' : 'white'}" 
+                              stroke="${isChallengePos ? '#FF5A5F' : '#ddd'}" stroke-width="2" pointer-events="none" />`;
+                } else if (isChallengePos) {
+                    // Fret challenge dot
+                    const cx = x + w/2;
+                    html += `<circle cx="${cx}" cy="${y + h/2}" r="11" fill="#FF5A5F" stroke="#FF5A5F" stroke-width="2" pointer-events="none" />`;
+                    html += `<circle cx="${cx}" cy="${y + h/2}" r="14" fill="none" stroke="#FF5A5F" stroke-width="2" opacity="0.3" pointer-events="none" />`;
                 }
 
+                // Theory/Feedback dots
                 const highlight = this.highlights.find(h => h.stringIdx === s && h.fret === f);
                 if (highlight) {
                     const fx = isNut ? this.margin.left - 25 : x + w/2;
@@ -94,14 +99,15 @@ export class FretboardUI {
             }
         }
 
-        // Draw CLICKABLE zones (Must be LAST to be on top)
+        // Draw CLICKABLE zones (Must be LAST and larger for better hit detection)
         for (let s = 0; s < 6; s++) {
             for (let f = minFret; f <= maxFret; f++) {
                 const isNut = f === 0;
                 const x = isNut ? this.margin.left - 40 : this.margin.left + (f - minFret) * this.fretWidth - this.fretWidth;
-                const y = this.margin.top + s * this.stringHeight - this.stringHeight / 2;
+                // Add 10px padding to the hitbox vertically
+                const y = this.margin.top + s * this.stringHeight - (this.stringHeight + 10) / 2;
                 const w = isNut ? 40 : this.fretWidth;
-                const h = this.stringHeight;
+                const h = this.stringHeight + 10;
 
                 html += `<rect x="${x}" y="${y}" width="${w}" height="${h}" 
                           fill="white" fill-opacity="0" 
