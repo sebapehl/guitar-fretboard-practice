@@ -1192,7 +1192,6 @@
             }
 
             if (currentUser) {
-                dbStatusEl.innerText = '☁️ Saving to cloud...';
                 logDebug('Attempting cloud save...');
                 try {
                     const scoreData = {
@@ -1206,8 +1205,7 @@
 
                     const { error } = await withTimeout(supabase.from('scores').insert(scoreData));
                     if (error) throw error;
-                    dbStatusEl.innerText = '✅ Score synced to cloud';
-                    dbStatusEl.style.color = 'green';
+                    dbStatusEl.innerText = '';
                     logDebug('Cloud save SUCCESS');
 
                     // If it was a perfect game, fetch rank
@@ -1222,7 +1220,7 @@
                 }
             } else {
                 logDebug('Cloud save SKIPPED: No user logged in');
-                dbStatusEl.innerText = '⚠️ Login to sync scores';
+                dbStatusEl.innerText = '';
             }
         }
 
