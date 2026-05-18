@@ -119,11 +119,12 @@
             font-weight: 600;
             color: var(--text-muted);
             opacity: 0;
+            pointer-events: none;
             background: #f7f7f7;
             padding: 8px;
             border-radius: 50px;
         }
-        .stats-bar.visible { opacity: 1; }
+        .stats-bar.visible { opacity: 1; pointer-events: auto; }
         .timer { color: var(--text); font-variant-numeric: tabular-nums; }
         
         .challenge-display {
