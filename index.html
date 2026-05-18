@@ -177,13 +177,31 @@
 
         .feedback {
             height: 3rem;
-            margin-top: 1.5rem;
+            margin-top: 0.5rem;
             font-weight: 700;
             font-size: 1.4rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: 0.2s;
         }
+
+        @keyframes success-pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); color: var(--accent-green); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes error-shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); color: var(--primary); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        .success-animate { animation: success-pop 0.4s ease-out; }
+        .error-animate { animation: error-shake 0.4s ease-in-out; }
 
         .controls {
             margin-top: 2.5rem;
@@ -1085,12 +1103,18 @@
             const result = state.submitAnswer(answer);
             ui.showFeedback(feedbackStringIdx, feedbackFret, result.correct);
 
+            // Trigger animations
+            feedbackEl.classList.remove('success-animate', 'error-animate');
+            void feedbackEl.offsetWidth; // Force reflow to re-trigger animation
+
             if (result.correct) {
                 feedbackEl.innerText = "Correct! ✅";
-                feedbackEl.style.color = "green";
+                feedbackEl.style.color = "var(--accent-green)";
+                feedbackEl.classList.add('success-animate');
             } else {
                 feedbackEl.innerText = `Missed! ${state.mode === 'identify' ? 'It was ' + state.currentChallenge.correctNote : ''} ❌`;
-                feedbackEl.style.color = "red";
+                feedbackEl.style.color = "var(--primary)";
+                feedbackEl.classList.add('error-animate');
             }
 
             scoreEl.innerText = `Score: ${state.score}`;
