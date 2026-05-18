@@ -60,16 +60,13 @@
             height: 40px;
             justify-content: center;
             align-items: center;
-            transition: 0.2s;
         }
-        .burger-icon:hover { box-shadow: var(--shadow); }
         .burger-icon span {
             display: block;
             width: 16px;
             height: 2px;
             background: var(--text);
             border-radius: 2px;
-            transition: 0.3s;
         }
         header h2 { 
             margin: 0; 
@@ -87,7 +84,6 @@
             height: 100vh;
             background: var(--card-bg);
             box-shadow: 10px 0 30px rgba(0,0,0,0.1);
-            transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 2000;
             padding: 30px 0;
         }
@@ -99,7 +95,6 @@
             font-weight: 500;
             color: var(--text);
             font-size: 1rem;
-            transition: 0.2s;
         }
         nav li:hover { background: #f7f7f7; padding-left: 35px; }
         nav li.active { color: var(--primary); background: var(--primary-soft); font-weight: 700; }
@@ -127,7 +122,6 @@
             background: #f7f7f7;
             padding: 8px;
             border-radius: 50px;
-            transition: 0.3s;
         }
         .stats-bar.visible { opacity: 1; }
         .timer { color: var(--text); font-variant-numeric: tabular-nums; }
@@ -218,7 +212,6 @@
             font-weight: 700;
             cursor: pointer;
             font-size: 1rem;
-            transition: 0.2s;
             box-shadow: 0 4px 10px rgba(255, 90, 95, 0.2);
         }
         .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(255, 90, 95, 0.3); }
@@ -363,7 +356,7 @@
         <button id="sound-toggle-btn" class="btn btn-secondary" style="margin-right: 15px; padding: 8px 16px; border-radius: 50px; font-size: 0.8rem; background: #f1f3f5; color: var(--text);">
             🔈 Sound: Off
         </button>
-        <div id="header-home-btn" style="cursor: pointer; padding: 8px; border: 1px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: white;">
+        <div id="header-home-btn" style="cursor: pointer; padding: 8px; border: 1px solid #ddd; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: white;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF5A5F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
     </header>
