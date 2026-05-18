@@ -150,8 +150,11 @@ export class GameState {
             correct = isCorrectNote(answer, this.currentChallenge.correctNote);
         } else {
             // Locate mode: answer is { stringIdx, fret }
-            const answerNote = getNoteAt(STRINGS[answer.stringIdx].open, answer.fret);
-            correct = isCorrectNote(answerNote, this.currentChallenge.correctNote);
+            // Must be on the CORRECT string requested by the challenge
+            if (answer.stringIdx === this.currentChallenge.stringIdx) {
+                const answerNote = getNoteAt(STRINGS[answer.stringIdx].open, answer.fret);
+                correct = isCorrectNote(answerNote, this.currentChallenge.correctNote);
+            }
         }
 
         if (correct) this.score++;

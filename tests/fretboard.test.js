@@ -48,6 +48,21 @@ describe('GameState', () => {
         expect(game.history.length).toBe(1);
     });
 
+    it('should require the correct string in locate mode', () => {
+        game.mode = 'locate';
+        game.startRound();
+        const target = game.currentChallenge; // { stringIdx, fret, correctNote }
+        
+        // Find the same note on a DIFFERENT string
+        let wrongStringIdx = (target.stringIdx + 1) % 6;
+        
+        // Submit correct note name but WRONG string
+        const result = game.submitAnswer({ stringIdx: wrongStringIdx, fret: target.fret });
+        
+        expect(result.correct).toBe(false);
+        expect(game.score).toBe(0);
+    });
+
     it('should respect fret range scaffolding', () => {
         game.fretRange = [0, 3];
         for (let i = 0; i < 50; i++) {
