@@ -160,7 +160,7 @@ export class FretboardUI {
         setTimeout(() => {
             this.highlights = this.highlights.filter(item => item !== h);
             this.render();
-        }, 500);
+        }, 200);
     }
 
     setHighlights(highlights) {
