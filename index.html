@@ -1172,6 +1172,32 @@
             ui.render();
         }
 
+        function startCountdown() {
+            stopGame();
+            startBtn.style.display = 'none';
+            activeGameControls.style.display = 'flex';
+            
+            let count = 3;
+            challengeEl.style.fontSize = '2.5rem';
+            
+            const runCount = () => {
+                if (count > 0) {
+                    challengeEl.innerText = count;
+                    guitar.playNote('C3');
+                    count--;
+                    setTimeout(runCount, 1000);
+                } else {
+                    challengeEl.innerText = 'GO!';
+                    guitar.playNote('C4');
+                    setTimeout(() => {
+                        challengeEl.style.fontSize = '1.1rem';
+                        startGame();
+                    }, 500);
+                }
+            };
+            runCount();
+        }
+
         function startGame() {
             state.startRound();
             feedbackEl.innerText = '';
@@ -1197,9 +1223,10 @@
             activeGameControls.style.display = 'none';
             startBtn.style.display = 'block';
             startBtn.innerText = 'Start Sprint';
+            challengeEl.style.fontSize = '1.1rem';
         }
 
-        restartBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', startCountdown);
         cancelBtn.addEventListener('click', goHome);
 
         function endGame() {
@@ -1350,7 +1377,7 @@
             }
         });
 
-        startBtn.addEventListener('click', startGame);
+        startBtn.addEventListener('click', startCountdown);
 
         init();
     </script>
