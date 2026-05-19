@@ -484,7 +484,11 @@
             <div id="db-status" style="font-size: 0.8rem; margin-top: 5px; min-height: 1rem;"></div>
 
             <div class="controls" id="main-controls">
-                <button class="btn" id="start-btn">Start 10-Note Sprint</button>
+                <button class="btn" id="start-btn">Start Sprint</button>
+                <div id="active-game-controls" style="display: none; gap: 10px;">
+                    <button class="btn btn-secondary" id="restart-btn" style="padding: 10px 20px; font-size: 0.85rem;">Restart</button>
+                    <button class="btn btn-secondary" id="cancel-btn" style="padding: 10px 20px; font-size: 0.85rem;">Cancel</button>
+                </div>
             </div>
 
             <div class="pb-display" id="pb-text"></div>
@@ -637,6 +641,9 @@
         const roundEl = document.getElementById('round-indicator');
         const scoreEl = document.getElementById('score-indicator');
         const startBtn = document.getElementById('start-btn');
+        const activeGameControls = document.getElementById('active-game-controls');
+        const restartBtn = document.getElementById('restart-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
         const pbEl = document.getElementById('pb-text');
         const statsBar = document.getElementById('stats-bar');
         const dbStatusEl = document.getElementById('db-status');
@@ -1158,6 +1165,7 @@
             dbStatusEl.style.color = 'inherit';
             rankDisplayEl.innerHTML = '';
             startBtn.style.display = 'none';
+            activeGameControls.style.display = 'flex';
             gameOverScreen.style.display = 'none';
             statsBar.classList.add('visible');
             updateUI();
@@ -1172,7 +1180,13 @@
             clearInterval(timerInterval);
             state.status = 'idle';
             state.currentChallenge = null;
+            activeGameControls.style.display = 'none';
+            startBtn.style.display = 'block';
+            startBtn.innerText = 'Start Sprint';
         }
+
+        restartBtn.addEventListener('click', startGame);
+        cancelBtn.addEventListener('click', goHome);
 
         function endGame() {
             logDebug('Game finished, calling endGame');
@@ -1181,8 +1195,10 @@
             timerEl.innerText = `${totalTime.toFixed(2)}s`;
             challengeEl.innerText = "Round Complete!";
             feedbackEl.innerText = `Final: ${state.score}/${state.rounds} in ${totalTime.toFixed(2)}s`;
+
             startBtn.style.display = 'block';
             startBtn.innerText = 'Go Again';
+            activeGameControls.style.display = 'none';
             noteInputEl.style.display = 'none';
             
             // Show overlay
