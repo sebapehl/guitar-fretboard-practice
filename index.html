@@ -167,10 +167,8 @@
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: 0.2s cubic-bezier(0.2, 0, 0, 1);
         }
         .note-btn:hover { border-color: var(--text); background: #f7f7f7; }
-        .note-btn:active { transform: scale(0.92); }
 
         .feedback {
             height: 2rem;
@@ -217,8 +215,7 @@
             font-size: 1rem;
             box-shadow: 0 4px 10px rgba(255, 90, 95, 0.2);
         }
-        .btn:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(255, 90, 95, 0.3); }
-        .btn:active { transform: translateY(1px); }
+        .btn:hover { box-shadow: 0 6px 15px rgba(255, 90, 95, 0.3); }
         .btn-secondary { 
             background: white; 
             color: var(--text); 
@@ -288,7 +285,6 @@
             font-weight: 600;
             cursor: pointer;
             color: var(--text-muted);
-            transition: 0.2s;
         }
         .filter-btn.active {
             background: white;
@@ -302,13 +298,11 @@
             color: white;
             border-radius: 20px;
             cursor: pointer;
-            transition: 0.2s;
             border: 1px solid transparent;
             text-align: left;
             box-shadow: 0 4px 12px rgba(255, 90, 95, 0.15);
         }
-        .mode-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 90, 95, 0.25); }
-        .mode-card:active { transform: scale(0.98); }
+        .mode-card:hover { box-shadow: 0 8px 20px rgba(255, 90, 95, 0.25); }
 
         /* Theory Styles */
         .hack-card {
