@@ -180,27 +180,32 @@
         .note-btn:hover { border-color: var(--text); background: #f7f7f7; }
 
         .feedback {
-            height: 2rem;
-            line-height: 2rem;
+            height: 2.2rem;
+            line-height: 2.2rem;
             margin-top: 0.5rem;
-            font-weight: 700;
+            font-weight: 800;
             font-size: 1.4rem;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            border-radius: 50px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 1.5rem;
         }
 
         @keyframes success-pop {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; color: var(--accent-green); }
-            100% { opacity: 1; }
+            0% { transform: scale(1); background-color: transparent; }
+            50% { transform: scale(1.1); background-color: rgba(0, 166, 153, 0.15); color: var(--accent-green); }
+            100% { transform: scale(1); background-color: transparent; }
         }
 
         @keyframes error-shake {
-            0% { background-color: transparent; }
-            50% { background-color: rgba(255, 90, 95, 0.1); color: var(--primary); }
-            100% { background-color: transparent; }
+            0%, 100% { transform: translateX(0); background-color: transparent; }
+            20%, 60% { transform: translateX(-10px); background-color: rgba(255, 90, 95, 0.15); color: var(--primary); }
+            40%, 80% { transform: translateX(10px); }
         }
 
         .success-animate { animation: success-pop 0.4s ease-out; }
