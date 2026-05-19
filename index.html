@@ -138,18 +138,32 @@
         .challenge-display {
             background: var(--primary-soft);
             color: var(--primary);
-            padding: 0.4rem 1rem;
+            padding: 0 1rem;
             border-radius: 20px;
             font-size: 1.1rem;
             font-weight: 800;
             margin-bottom: 0.5rem;
-            height: 2.5rem;
-            line-height: 1.1rem;
-            overflow: hidden;
+            height: 2.8rem;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
+            position: relative;
         }
+
+        #challenge-text { flex: 1; text-align: center; }
+
+        .header-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .header-btn:active { background: #eee; }
 
         #fretboard-ui {
             margin: 10px 0;
@@ -465,8 +479,12 @@
                 <div id="score-indicator">Score: 0</div>
             </div>
 
-            <div class="challenge-display" id="challenge-text">
-                Ready?
+            <div class="challenge-display">
+                <div id="challenge-text">Ready?</div>
+                <div id="active-game-controls" style="display: none; gap: 8px; margin-left: 10px;">
+                    <button class="header-btn" id="restart-btn">Restart</button>
+                    <button class="header-btn" id="cancel-btn">Cancel</button>
+                </div>
             </div>
 
             <div id="fretboard-ui"></div>
@@ -485,10 +503,6 @@
 
             <div class="controls" id="main-controls">
                 <button class="btn" id="start-btn">Start Sprint</button>
-                <div id="active-game-controls" style="display: none; gap: 10px;">
-                    <button class="btn btn-secondary" id="restart-btn" style="padding: 10px 20px; font-size: 0.85rem;">Restart</button>
-                    <button class="btn btn-secondary" id="cancel-btn" style="padding: 10px 20px; font-size: 0.85rem;">Cancel</button>
-                </div>
             </div>
 
             <div class="pb-display" id="pb-text"></div>
