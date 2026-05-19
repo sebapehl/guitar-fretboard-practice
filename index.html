@@ -135,6 +135,8 @@
             font-size: 1.1rem;
             font-weight: 800;
             margin-bottom: 0.5rem;
+            height: 2.5rem;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -171,14 +173,14 @@
         .note-btn:active { transform: scale(0.92); }
 
         .feedback {
-            height: 3rem;
+            height: 2rem;
             margin-top: 0.5rem;
             font-weight: 700;
             font-size: 1.4rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.2s;
+            overflow: hidden;
         }
 
         @keyframes success-pop {
@@ -1097,19 +1099,21 @@
             const result = state.submitAnswer(answer);
             ui.showFeedback(feedbackStringIdx, feedbackFret, result.correct);
 
-            // Trigger animations
+            // Trigger animations without forced reflow
             feedbackEl.classList.remove('success-animate', 'error-animate');
-            void feedbackEl.offsetWidth; // Force reflow to re-trigger animation
-
-            if (result.correct) {
-                feedbackEl.innerText = "Correct! ✅";
-                feedbackEl.style.color = "var(--accent-green)";
-                feedbackEl.classList.add('success-animate');
-            } else {
-                feedbackEl.innerText = `Missed! ${state.mode === 'identify' ? 'It was ' + state.currentChallenge.correctNote : ''} ❌`;
-                feedbackEl.style.color = "var(--primary)";
-                feedbackEl.classList.add('error-animate');
-            }
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    if (result.correct) {
+                        feedbackEl.innerText = "Correct! ✅";
+                        feedbackEl.style.color = "var(--accent-green)";
+                        feedbackEl.classList.add('success-animate');
+                    } else {
+                        feedbackEl.innerText = `Missed! ${state.mode === 'identify' ? 'It was ' + state.currentChallenge.correctNote : ''} ❌`;
+                        feedbackEl.style.color = "var(--primary)";
+                        feedbackEl.classList.add('error-animate');
+                    }
+                });
+            });
 
             scoreEl.innerText = `Score: ${state.score}`;
             
