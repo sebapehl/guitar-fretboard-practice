@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { getNoteAt, isCorrectNote, GameState, NOTES } from '../fretboard.js';
+import { getNoteAt, isCorrectNote, GameState, NOTES, getNoteInfo } from '../fretboard.js';
 
 describe('Fretboard Logic', () => {
     it('should correctly identify notes at frets', () => {
@@ -83,5 +83,67 @@ describe('GameState', () => {
             expect(challenge.correctNote).not.toBe(lastNote);
             lastNote = challenge.correctNote;
         }
+    });
+
+    describe('Positional Practice', () => {
+        it('should toggle positional mode and preserve/restore manual range', () => {
+            game.fretRange = [0, 5];
+            game.togglePositional();
+            expect(game.isPositional).toBe(true);
+            expect(game.manualFretRange).toEqual([0, 5]);
+
+            // Simulation: game sets a neighborhood
+            // We'll loop a few times to ensure we don't just coincidentally hit [0,5]
+            let changed = false;
+            for (let i = 0; i < 20; i++) {
+                game.nextChallenge();
+                if (game.fretRange[0] !== 0) {
+                    changed = true;
+                    break;
+                }
+            }
+            expect(changed).toBe(true);
+
+            game.togglePositional();
+            expect(game.isPositional).toBe(false);
+            expect(game.fretRange).toEqual([0, 5]);
+        });
+
+        it('should pick a neighborhood within valid guitar range (0-22)', () => {
+            game.isPositional = true;
+            for (let i = 0; i < 100; i++) {
+                game.nextChallenge();
+                expect(game.anchorFret).toBeGreaterThanOrEqual(0);
+                expect(game.anchorFret).toBeLessThanOrEqual(22 - 5);
+                expect(game.fretRange[0]).toBe(game.anchorFret);
+                expect(game.fretRange[1]).toBe(game.anchorFret + 5);
+                expect(game.currentChallenge.fret).toBeGreaterThanOrEqual(game.fretRange[0]);
+                expect(game.currentChallenge.fret).toBeLessThanOrEqual(game.fretRange[1]);
+            }
+        });
+
+        it('should record positional metadata in history', () => {
+            game.isPositional = true;
+            game.startRound();
+            const anchor = game.anchorFret;
+            game.submitAnswer(game.currentChallenge.correctNote);
+
+            const record = game.history[0];
+            expect(record.challenge.is_positional).toBe(true);
+            expect(record.challenge.anchor_fret).toBe(anchor);
+        });
+    });
+
+    describe('getNoteInfo', () => {
+        it('should return correct note info using the NOTES array', () => {
+            const info = getNoteInfo(5, 0); // Low E, fret 0
+            expect(info.name).toBe('E');
+            expect(info.octave).toBe(2);
+            expect(info.full).toBe('E2');
+
+            const info2 = getNoteInfo(0, 8); // High e, fret 8 (C5)
+            expect(info2.name).toBe('C');
+            expect(info2.octave).toBe(5);
+        });
     });
 });

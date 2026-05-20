@@ -57,18 +57,17 @@ export const STRINGS = [
  * e.g. { name: "C", octave: 4, full: "C4" }
  */
 export function getNoteInfo(stringIdx, fret) {
-    if (stringIdx < 0 || stringIdx >= STRINGS.length) return { name: "?", octave: 0, full: "C4" };
+    if (stringIdx < 0 || stringIdx >= STRINGS.length) return { name: "?", octave: 0, full: "?" };
     const baseMidi = STRINGS[stringIdx].midi;
     const midi = baseMidi + fret;
     const octave = Math.floor(midi / 12) - 1;
-    const noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
-    const name = noteNames[midi % 12];
+    const name = NOTES[((midi % 12) + 12) % 12];
     return { name, octave, full: `${name}${octave}` };
 }
 
 export function getNoteAt(stringOpen, fret) {
     const openValue = NOTE_VALUES[stringOpen];
-    const noteValue = (openValue + fret) % 12;
+    const noteValue = ((openValue + fret) % 12 + 12) % 12;
     return NOTES[noteValue];
 }
 
@@ -90,6 +89,9 @@ export class GameState {
     constructor() {
         this.mode = 'identify'; // 'identify' (Position -> Name) or 'locate' (Name -> Position)
         this.fretRange = [0, 12];
+        this.manualFretRange = [0, 12];
+        this.isPositional = false;
+        this.anchorFret = 0;
         this.stringRange = [0, 5];
         this.rounds = 10;
         this.currentRound = 0;
@@ -99,6 +101,15 @@ export class GameState {
         this.roundStartTime = null;
         this.status = 'idle'; // 'idle', 'playing', 'finished'
         this.currentChallenge = null;
+    }
+
+    togglePositional() {
+        this.isPositional = !this.isPositional;
+        if (this.isPositional) {
+            this.manualFretRange = [...this.fretRange];
+        } else {
+            this.fretRange = [...this.manualFretRange];
+        }
     }
 
     startRound() {
@@ -117,6 +128,14 @@ export class GameState {
             return null;
         }
 
+        if (this.isPositional) {
+            const windowSize = 5;
+            const maxFret = 22;
+            const anchor = Math.floor(Math.random() * (maxFret - windowSize + 1));
+            this.fretRange = [anchor, anchor + windowSize];
+            this.anchorFret = anchor;
+        }
+
         const lastNote = this.currentChallenge ? this.currentChallenge.correctNote : null;
         let stringIdx, fret, correctNote;
         
@@ -124,9 +143,10 @@ export class GameState {
         do {
             stringIdx = Math.floor(Math.random() * (this.stringRange[1] - this.stringRange[0] + 1)) + this.stringRange[0];
             fret = Math.floor(Math.random() * (this.fretRange[1] - this.fretRange[0] + 1)) + this.fretRange[0];
+            
             correctNote = getNoteAt(STRINGS[stringIdx].open, fret);
             attempts++;
-        } while (correctNote === lastNote && attempts < 20);
+        } while (correctNote === lastNote && attempts < 40);
 
         const stringObj = STRINGS[stringIdx];
         this.currentChallenge = {
@@ -134,7 +154,10 @@ export class GameState {
             stringName: stringObj.name,
             fret,
             correctNote,
-            timestamp: performance.now()
+            timestamp: performance.now(),
+            is_positional: this.isPositional,
+            anchor_fret: this.anchorFret,
+            validFretRange: [...this.fretRange] // Lock the range at challenge time
         };
         this.roundStartTime = this.currentChallenge.timestamp;
         this.currentRound++;
@@ -152,8 +175,13 @@ export class GameState {
             // Locate mode: answer is { stringIdx, fret }
             // Must be on the CORRECT string requested by the challenge
             if (answer.stringIdx === this.currentChallenge.stringIdx) {
-                const answerNote = getNoteAt(STRINGS[answer.stringIdx].open, answer.fret);
-                correct = isCorrectNote(answerNote, this.currentChallenge.correctNote);
+                // If positional, MUST be within the neighborhood locked at challenge time
+                const range = this.currentChallenge.validFretRange || this.fretRange;
+                const inRange = answer.fret >= range[0] && answer.fret <= range[1];
+                if (inRange) {
+                    const answerNote = getNoteAt(STRINGS[answer.stringIdx].open, answer.fret);
+                    correct = isCorrectNote(answerNote, this.currentChallenge.correctNote);
+                }
             }
         }
 

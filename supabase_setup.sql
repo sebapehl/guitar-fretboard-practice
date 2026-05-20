@@ -15,6 +15,8 @@ CREATE TABLE scores (
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
     mode TEXT NOT NULL, -- 'identify' or 'locate'
     fret_max INTEGER NOT NULL,
+    is_positional BOOLEAN DEFAULT FALSE,
+    anchor_fret INTEGER,
     total_time_ms FLOAT NOT NULL,
     accuracy DOUBLE PRECISION NOT NULL,
     history JSONB, -- Storing full round history for anti-cheat verification
@@ -49,6 +51,8 @@ CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.
 -- Policies for Scores
 CREATE POLICY "Scores are viewable by everyone" ON scores FOR SELECT USING (true);
 CREATE POLICY "Users can insert own scores" ON scores FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE INDEX idx_scores_is_positional ON scores(is_positional);
 
 -- Policies for Duels (Simple v1)
 CREATE POLICY "Anyone can view duels" ON duels FOR SELECT USING (true);
