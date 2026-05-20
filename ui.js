@@ -13,7 +13,9 @@ export class FretboardUI {
     }
 
     render() {
-        const [minFret, maxFret] = this.game.fretRange;
+        // Always render the full neck for smooth positional scrolling
+        const minFret = 0;
+        const maxFret = 22;
         const numFrets = maxFret - minFret;
         const width = (numFrets + 1) * this.fretWidth + this.margin.left + this.margin.right;
         const height = 5 * this.stringHeight + this.margin.top + this.margin.bottom;
@@ -47,7 +49,7 @@ export class FretboardUI {
         }
 
         // Draw markers
-        const markers = [3, 5, 7, 9, 12];
+        const markers = [3, 5, 7, 9, 12, 15, 17, 19, 21];
         markers.forEach(m => {
             if (m >= minFret && m <= maxFret) {
                 const x = this.margin.left + (m - minFret) * this.fretWidth - this.fretWidth / 2;
@@ -122,6 +124,11 @@ export class FretboardUI {
         html += '</svg>';
         this.container.innerHTML = html;
 
+        // Auto-scroll if in positional mode
+        if (this.game.isPositional) {
+            this.scrollToFret(this.game.anchorFret);
+        }
+
         // Add event listeners
         const hoverDot = this.container.querySelector('#hover-dot');
 
@@ -145,6 +152,15 @@ export class FretboardUI {
                 const fret = parseInt(e.target.dataset.fret);
                 this.onFretClick(stringIdx, fret);
             });
+        });
+    }
+
+    scrollToFret(fret) {
+        // Open string is special, offset by nut width
+        const x = fret === 0 ? 0 : (fret - 1) * this.fretWidth + this.margin.left;
+        this.container.scrollTo({
+            left: x,
+            behavior: 'smooth'
         });
     }
 

@@ -489,9 +489,13 @@
 
             <div id="fretboard-ui"></div>
 
-            <div id="game-settings" style="margin: 5px auto; padding: 6px 10px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 0.8rem; max-width: 400px;">
+            <div id="game-settings" style="margin: 8px auto; padding: 8px 12px; background: #f8f9fa; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 1rem; max-width: 440px;">
                 <label style="font-weight: 600; white-space: nowrap;">Fret Range: <span id="fret-range-val">0 - 12</span></label>
-                <input type="range" id="setting-fret-max" min="1" max="22" value="12" style="flex: 1;">
+                <input type="range" id="setting-fret-max" min="1" max="22" value="12" style="flex: 1; cursor: pointer;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px; border-left: 1px solid #ddd; padding-left: 16px; min-height: 44px;">
+                    <input type="checkbox" id="setting-positional" style="width: 20px; height: 20px; cursor: pointer;">
+                    <label for="setting-positional" style="font-weight: 600; cursor: pointer; white-space: nowrap;">Position Lock</label>
+                </div>
             </div>
 
             <div class="note-buttons" id="note-input" style="display: none;">
@@ -754,11 +758,14 @@
         function showView(viewName) {
             // Reset fret range to standard 0-12 on every view change
             state.fretRange = [0, 12];
+            state.isPositional = false;
             const fretSlider = document.getElementById('setting-fret-max');
             if (fretSlider) {
                 fretSlider.value = 12;
                 document.getElementById('fret-range-val').innerText = '0 - 12';
             }
+            const posToggle = document.getElementById('setting-positional');
+            if (posToggle) posToggle.checked = false;
 
             landingView.style.display = viewName === 'landing' ? 'block' : 'none';
             gameView.style.display = viewName === 'game' ? 'block' : 'none';
@@ -1287,7 +1294,9 @@
                         fret_max: state.fretRange[1],
                         total_time_ms: time * 1000,
                         accuracy: state.score / state.rounds,
-                        history: state.history
+                        history: state.history,
+                        is_positional: state.isPositional,
+                        anchor_fret: state.anchorFret
                     };
 
                     const { error } = await withTimeout(supabase.from('scores').insert(scoreData));
@@ -1376,6 +1385,18 @@
                 updatePBDisplay();
                 ui.render();
             }
+        });
+
+        document.getElementById('setting-positional').addEventListener('change', (e) => {
+            state.togglePositional();
+            // If turning OFF, we restore the slider value
+            if (!state.isPositional) {
+                const max = state.fretRange[1];
+                document.getElementById('setting-fret-max').value = max;
+                document.getElementById('fret-range-val').innerText = `0 - ${max}`;
+            }
+            ui.render();
+            updatePBDisplay();
         });
 
         startBtn.addEventListener('click', startCountdown);
