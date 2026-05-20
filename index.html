@@ -521,13 +521,9 @@
             <div id="fretboard-ui"></div>
 
             <div id="game-settings" class="game-settings">
-                <div class="setting-range">
+                <div class="setting-range" style="border-right: none; padding-right: 0;">
                     <label style="font-weight: 600; white-space: nowrap;">Fret Range: <span id="fret-range-val">0 - 12</span></label>
                     <input type="range" id="setting-fret-max" min="1" max="22" value="12" style="flex: 1; cursor: pointer;">
-                </div>
-                <div class="setting-toggle">
-                    <input type="checkbox" id="setting-positional" style="width: 20px; height: 20px; cursor: pointer;">
-                    <label for="setting-positional" style="font-weight: 600; cursor: pointer; white-space: nowrap;">Position Lock</label>
                 </div>
             </div>
 
@@ -791,15 +787,11 @@
         function showView(viewName) {
             // Reset fret range to standard 0-12 on every view change
             state.fretRange = [0, 12];
-            state.manualFretRange = [0, 12];
-            state.isPositional = false;
             const fretSlider = document.getElementById('setting-fret-max');
             if (fretSlider) {
                 fretSlider.value = 12;
                 document.getElementById('fret-range-val').innerText = '0 - 12';
             }
-            const posToggle = document.getElementById('setting-positional');
-            if (posToggle) posToggle.checked = false;
 
             landingView.style.display = viewName === 'landing' ? 'block' : 'none';
             gameView.style.display = viewName === 'game' ? 'block' : 'none';
@@ -1328,9 +1320,7 @@
                         fret_max: state.fretRange[1],
                         total_time_ms: time * 1000,
                         accuracy: state.score / state.rounds,
-                        history: state.history,
-                        is_positional: state.isPositional,
-                        anchor_fret: state.anchorFret
+                        history: state.history
                     };
 
                     const { error } = await withTimeout(supabase.from('scores').insert(scoreData));
@@ -1415,23 +1405,10 @@
             const max = parseInt(e.target.value);
             document.getElementById('fret-range-val').innerText = `0 - ${max}`;
             state.fretRange = [0, max];
-            state.manualFretRange = [0, max];
             if (state.status !== 'playing') {
                 updatePBDisplay();
                 ui.render();
             }
-        });
-
-        document.getElementById('setting-positional').addEventListener('change', (e) => {
-            state.togglePositional();
-            // If turning OFF, we restore the slider value
-            if (!state.isPositional) {
-                const max = state.fretRange[1];
-                document.getElementById('setting-fret-max').value = max;
-                document.getElementById('fret-range-val').innerText = `0 - ${max}`;
-            }
-            ui.render();
-            updatePBDisplay();
         });
 
         startBtn.addEventListener('click', startCountdown);

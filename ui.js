@@ -124,9 +124,9 @@ export class FretboardUI {
         html += '</svg>';
         this.container.innerHTML = html;
 
-        // Auto-scroll if in positional mode
-        if (this.game.isPositional) {
-            this.scrollToFret(this.game.anchorFret);
+        // Auto-scroll to the active neighborhood (Mandatory Positional Practice)
+        if (this.game.status === 'playing' && this.game.currentNeighborhood) {
+            this.scrollToFret(this.game.currentNeighborhood[0]);
         }
 
         // Add event listeners

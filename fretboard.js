@@ -88,10 +88,8 @@ export function isCorrectNote(userAnswer, correctNote) {
 export class GameState {
     constructor() {
         this.mode = 'identify'; // 'identify' (Position -> Name) or 'locate' (Name -> Position)
-        this.fretRange = [0, 12];
-        this.manualFretRange = [0, 12];
-        this.isPositional = false;
-        this.anchorFret = 0;
+        this.fretRange = [0, 12]; // The overall practice bounds (e.g., set by user slider)
+        this.currentNeighborhood = [0, 5]; // The active 5-fret window
         this.stringRange = [0, 5];
         this.rounds = 10;
         this.currentRound = 0;
@@ -101,15 +99,6 @@ export class GameState {
         this.roundStartTime = null;
         this.status = 'idle'; // 'idle', 'playing', 'finished'
         this.currentChallenge = null;
-    }
-
-    togglePositional() {
-        this.isPositional = !this.isPositional;
-        if (this.isPositional) {
-            this.manualFretRange = [...this.fretRange];
-        } else {
-            this.fretRange = [...this.manualFretRange];
-        }
     }
 
     startRound() {
@@ -128,17 +117,14 @@ export class GameState {
             return null;
         }
 
-        if (this.isPositional) {
-            const windowSize = 5;
-            const [minLimit, maxLimit] = this.manualFretRange;
-            // Ensure window fits within the manual range; if range is smaller than 5 frets, use the whole range
-            const rangeSpan = maxLimit - minLimit;
-            const effectiveWindow = Math.min(windowSize, rangeSpan);
-            
-            const anchor = Math.floor(Math.random() * (rangeSpan - effectiveWindow + 1)) + minLimit;
-            this.fretRange = [anchor, anchor + effectiveWindow];
-            this.anchorFret = anchor;
-        }
+        // Positional Practice is now mandatory: pick a 5-fret neighborhood within the overall range
+        const windowSize = 5;
+        const [minLimit, maxLimit] = this.fretRange;
+        const rangeSpan = maxLimit - minLimit;
+        const effectiveWindow = Math.min(windowSize, rangeSpan);
+        
+        const anchor = Math.floor(Math.random() * (rangeSpan - effectiveWindow + 1)) + minLimit;
+        this.currentNeighborhood = [anchor, anchor + effectiveWindow];
 
         const lastNote = this.currentChallenge ? this.currentChallenge.correctNote : null;
         let stringIdx, fret, correctNote;
@@ -146,7 +132,7 @@ export class GameState {
         let attempts = 0;
         do {
             stringIdx = Math.floor(Math.random() * (this.stringRange[1] - this.stringRange[0] + 1)) + this.stringRange[0];
-            fret = Math.floor(Math.random() * (this.fretRange[1] - this.fretRange[0] + 1)) + this.fretRange[0];
+            fret = Math.floor(Math.random() * (this.currentNeighborhood[1] - this.currentNeighborhood[0] + 1)) + this.currentNeighborhood[0];
             
             correctNote = getNoteAt(STRINGS[stringIdx].open, fret);
             attempts++;
@@ -159,9 +145,7 @@ export class GameState {
             fret,
             correctNote,
             timestamp: performance.now(),
-            is_positional: this.isPositional,
-            anchor_fret: this.anchorFret,
-            validFretRange: [...this.fretRange] // Lock the range at challenge time
+            neighborhood: [...this.currentNeighborhood] // Lock the window at challenge time
         };
         this.roundStartTime = this.currentChallenge.timestamp;
         this.currentRound++;
@@ -177,10 +161,9 @@ export class GameState {
             correct = isCorrectNote(answer, this.currentChallenge.correctNote);
         } else {
             // Locate mode: answer is { stringIdx, fret }
-            // Must be on the CORRECT string requested by the challenge
             if (answer.stringIdx === this.currentChallenge.stringIdx) {
-                // If positional, MUST be within the neighborhood locked at challenge time
-                const range = this.currentChallenge.validFretRange || this.fretRange;
+                // Must be within the neighborhood locked at challenge time
+                const range = this.currentChallenge.neighborhood;
                 const inRange = answer.fret >= range[0] && answer.fret <= range[1];
                 if (inRange) {
                     const answerNote = getNoteAt(STRINGS[answer.stringIdx].open, answer.fret);

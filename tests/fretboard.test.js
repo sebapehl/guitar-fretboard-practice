@@ -85,65 +85,26 @@ describe('GameState', () => {
         }
     });
 
-    describe('Positional Practice', () => {
-        it('should toggle positional mode and preserve/restore manual range', () => {
-            game.manualFretRange = [0, 22];
-            game.fretRange = [0, 22];
-            game.togglePositional();
-            expect(game.isPositional).toBe(true);
-            expect(game.manualFretRange).toEqual([0, 22]);
-
-            // Simulation: game sets a neighborhood
-            // We'll loop a few times to ensure we don't just coincidentally hit [0,22]
-            let changed = false;
-            for (let i = 0; i < 20; i++) {
+    describe('Positional Neighborhoods', () => {
+        it('should always pick a neighborhood within the practice range', () => {
+            game.fretRange = [0, 12];
+            for (let i = 0; i < 50; i++) {
                 game.nextChallenge();
-                if (game.fretRange[1] - game.fretRange[0] < 22) {
-                    changed = true;
-                    break;
-                }
-            }
-            expect(changed).toBe(true);
-
-            game.togglePositional();
-            expect(game.isPositional).toBe(false);
-            expect(game.fretRange).toEqual([0, 22]);
-        });
-
-        it('should pick a neighborhood within the user-defined manual range', () => {
-            game.isPositional = true;
-            game.manualFretRange = [0, 12]; // User set slider to 0-12
-            for (let i = 0; i < 100; i++) {
-                game.nextChallenge();
-                expect(game.anchorFret).toBeGreaterThanOrEqual(0);
-                expect(game.anchorFret).toBeLessThanOrEqual(12 - 5);
-                expect(game.fretRange[0]).toBe(game.anchorFret);
-                expect(game.fretRange[1]).toBe(game.anchorFret + 5);
-                expect(game.currentChallenge.fret).toBeGreaterThanOrEqual(0);
-                expect(game.currentChallenge.fret).toBeLessThanOrEqual(12);
+                const [min, max] = game.currentNeighborhood;
+                expect(max - min).toBeLessThanOrEqual(5);
+                expect(min).toBeGreaterThanOrEqual(0);
+                expect(max).toBeLessThanOrEqual(12);
+                expect(game.currentChallenge.fret).toBeGreaterThanOrEqual(min);
+                expect(game.currentChallenge.fret).toBeLessThanOrEqual(max);
             }
         });
 
-        it('should shrink effective window if manual range is smaller than 5 frets', () => {
-            game.isPositional = true;
-            game.manualFretRange = [0, 3]; // User set slider to 0-3
-            for (let i = 0; i < 20; i++) {
+        it('should shrink the neighborhood if the total range is small', () => {
+            game.fretRange = [0, 3];
+            for (let i = 0; i < 10; i++) {
                 game.nextChallenge();
-                expect(game.fretRange).toEqual([0, 3]);
-                expect(game.currentChallenge.fret).toBeGreaterThanOrEqual(0);
-                expect(game.currentChallenge.fret).toBeLessThanOrEqual(3);
+                expect(game.currentNeighborhood).toEqual([0, 3]);
             }
-        });
-
-        it('should record positional metadata in history', () => {
-            game.isPositional = true;
-            game.startRound();
-            const anchor = game.anchorFret;
-            game.submitAnswer(game.currentChallenge.correctNote);
-
-            const record = game.history[0];
-            expect(record.challenge.is_positional).toBe(true);
-            expect(record.challenge.anchor_fret).toBe(anchor);
         });
     });
 
