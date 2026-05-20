@@ -358,6 +358,29 @@
             overflow-x: auto;
         }
 
+        .game-settings {
+            margin: 8px auto; 
+            padding: 8px 12px; 
+            background: #f8f9fa; 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 16px; 
+            font-size: 1rem; 
+            max-width: 440px;
+        }
+        .setting-item { display: flex; align-items: center; gap: 8px; }
+        .setting-range { flex: 1; display: flex; align-items: center; gap: 12px; }
+        .setting-toggle { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            border-left: 1px solid #ddd; 
+            padding-left: 16px; 
+            min-height: 44px; 
+        }
+
         @media (max-width: 600px) {
             .note-buttons { grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
             .container { padding: 0.5rem 1rem; border-radius: 0; box-shadow: none; border: none; background: transparent; }
@@ -366,6 +389,14 @@
             h2 { font-size: 1.2rem; }
             .stats-bar { margin-bottom: 5px; padding: 6px; font-size: 0.85rem; }
             .note-btn { padding: 12px 4px; font-size: 1rem; }
+            .game-settings { 
+                flex-wrap: wrap; 
+                gap: 8px; 
+                font-size: 0.9rem; 
+                padding: 10px;
+            }
+            .setting-range { width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+            .setting-toggle { border-left: none; padding-left: 0; width: 100%; justify-content: center; min-height: 36px; }
         }
     </style>
 </head>
@@ -489,10 +520,12 @@
 
             <div id="fretboard-ui"></div>
 
-            <div id="game-settings" style="margin: 8px auto; padding: 8px 12px; background: #f8f9fa; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 16px; font-size: 1rem; max-width: 440px;">
-                <label style="font-weight: 600; white-space: nowrap;">Fret Range: <span id="fret-range-val">0 - 12</span></label>
-                <input type="range" id="setting-fret-max" min="1" max="22" value="12" style="flex: 1; cursor: pointer;">
-                <div style="display: flex; align-items: center; gap: 8px; margin-left: 16px; border-left: 1px solid #ddd; padding-left: 16px; min-height: 44px;">
+            <div id="game-settings" class="game-settings">
+                <div class="setting-range">
+                    <label style="font-weight: 600; white-space: nowrap;">Fret Range: <span id="fret-range-val">0 - 12</span></label>
+                    <input type="range" id="setting-fret-max" min="1" max="22" value="12" style="flex: 1; cursor: pointer;">
+                </div>
+                <div class="setting-toggle">
                     <input type="checkbox" id="setting-positional" style="width: 20px; height: 20px; cursor: pointer;">
                     <label for="setting-positional" style="font-weight: 600; cursor: pointer; white-space: nowrap;">Position Lock</label>
                 </div>
