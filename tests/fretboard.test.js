@@ -87,17 +87,18 @@ describe('GameState', () => {
 
     describe('Positional Practice', () => {
         it('should toggle positional mode and preserve/restore manual range', () => {
-            game.fretRange = [0, 5];
+            game.manualFretRange = [0, 22];
+            game.fretRange = [0, 22];
             game.togglePositional();
             expect(game.isPositional).toBe(true);
-            expect(game.manualFretRange).toEqual([0, 5]);
+            expect(game.manualFretRange).toEqual([0, 22]);
 
             // Simulation: game sets a neighborhood
-            // We'll loop a few times to ensure we don't just coincidentally hit [0,5]
+            // We'll loop a few times to ensure we don't just coincidentally hit [0,22]
             let changed = false;
             for (let i = 0; i < 20; i++) {
                 game.nextChallenge();
-                if (game.fretRange[0] !== 0) {
+                if (game.fretRange[1] - game.fretRange[0] < 22) {
                     changed = true;
                     break;
                 }
@@ -106,19 +107,31 @@ describe('GameState', () => {
 
             game.togglePositional();
             expect(game.isPositional).toBe(false);
-            expect(game.fretRange).toEqual([0, 5]);
+            expect(game.fretRange).toEqual([0, 22]);
         });
 
-        it('should pick a neighborhood within valid guitar range (0-22)', () => {
+        it('should pick a neighborhood within the user-defined manual range', () => {
             game.isPositional = true;
+            game.manualFretRange = [0, 12]; // User set slider to 0-12
             for (let i = 0; i < 100; i++) {
                 game.nextChallenge();
                 expect(game.anchorFret).toBeGreaterThanOrEqual(0);
-                expect(game.anchorFret).toBeLessThanOrEqual(22 - 5);
+                expect(game.anchorFret).toBeLessThanOrEqual(12 - 5);
                 expect(game.fretRange[0]).toBe(game.anchorFret);
                 expect(game.fretRange[1]).toBe(game.anchorFret + 5);
-                expect(game.currentChallenge.fret).toBeGreaterThanOrEqual(game.fretRange[0]);
-                expect(game.currentChallenge.fret).toBeLessThanOrEqual(game.fretRange[1]);
+                expect(game.currentChallenge.fret).toBeGreaterThanOrEqual(0);
+                expect(game.currentChallenge.fret).toBeLessThanOrEqual(12);
+            }
+        });
+
+        it('should shrink effective window if manual range is smaller than 5 frets', () => {
+            game.isPositional = true;
+            game.manualFretRange = [0, 3]; // User set slider to 0-3
+            for (let i = 0; i < 20; i++) {
+                game.nextChallenge();
+                expect(game.fretRange).toEqual([0, 3]);
+                expect(game.currentChallenge.fret).toBeGreaterThanOrEqual(0);
+                expect(game.currentChallenge.fret).toBeLessThanOrEqual(3);
             }
         });
 

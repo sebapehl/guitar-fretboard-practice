@@ -130,9 +130,13 @@ export class GameState {
 
         if (this.isPositional) {
             const windowSize = 5;
-            const maxFret = 22;
-            const anchor = Math.floor(Math.random() * (maxFret - windowSize + 1));
-            this.fretRange = [anchor, anchor + windowSize];
+            const [minLimit, maxLimit] = this.manualFretRange;
+            // Ensure window fits within the manual range; if range is smaller than 5 frets, use the whole range
+            const rangeSpan = maxLimit - minLimit;
+            const effectiveWindow = Math.min(windowSize, rangeSpan);
+            
+            const anchor = Math.floor(Math.random() * (rangeSpan - effectiveWindow + 1)) + minLimit;
+            this.fretRange = [anchor, anchor + effectiveWindow];
             this.anchorFret = anchor;
         }
 

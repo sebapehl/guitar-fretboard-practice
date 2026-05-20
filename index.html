@@ -791,6 +791,7 @@
         function showView(viewName) {
             // Reset fret range to standard 0-12 on every view change
             state.fretRange = [0, 12];
+            state.manualFretRange = [0, 12];
             state.isPositional = false;
             const fretSlider = document.getElementById('setting-fret-max');
             if (fretSlider) {
@@ -1414,6 +1415,7 @@
             const max = parseInt(e.target.value);
             document.getElementById('fret-range-val').innerText = `0 - ${max}`;
             state.fretRange = [0, max];
+            state.manualFretRange = [0, max];
             if (state.status !== 'playing') {
                 updatePBDisplay();
                 ui.render();
