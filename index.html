@@ -1245,6 +1245,7 @@
         }
 
         function submitAnswer(answer) {
+            if (state.status !== 'playing') return;
             logDebug(`Answer submitted: ${typeof answer === 'string' ? answer : answer.fret}`);
             let feedbackStringIdx, feedbackFret;
             if (state.mode === 'identify') {
@@ -1308,6 +1309,10 @@
             gameOverScreen.style.display = 'none';
             startBtn.style.display = 'none';
             activeGameControls.style.display = 'flex';
+            
+            if (state.mode === 'identify') {
+                noteInputEl.style.display = 'grid';
+            }
             
             let count = 3;
             challengeEl.style.fontSize = '2.5rem';
