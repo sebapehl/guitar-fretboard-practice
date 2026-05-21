@@ -735,6 +735,26 @@
             return Promise.race([promise, timeout]).finally(() => clearTimeout(timeoutId));
         }
 
+        function formatRelativeTime(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Just now';
+            
+            const diffInMinutes = Math.floor(diffInSeconds / 60);
+            if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+            
+            const diffInHours = Math.floor(diffInMinutes / 60);
+            if (diffInHours < 24) return `${diffInHours}h ago`;
+            
+            const diffInDays = Math.floor(diffInHours / 24);
+            if (diffInDays < 7) return `${diffInDays}d ago`;
+            
+            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+
         // DOM Elements
         const landingView = document.getElementById('landing-view');
         const gameView = document.getElementById('game-view');
@@ -1039,7 +1059,10 @@
                                     ${idx + 1}
                                 </div>
                                 <div style="flex: 1; text-align: left;">
-                                    <div style="font-weight: 800; font-size: 1rem; color: var(--text);">${s.profiles?.username || 'Anonymous'}</div>
+                                    <div style="display: flex; align-items: baseline; gap: 8px;">
+                                        <div style="font-weight: 800; font-size: 1rem; color: var(--text);">${s.profiles?.username || 'Anonymous'}</div>
+                                        <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">${formatRelativeTime(s.created_at)}</div>
+                                    </div>
                                     <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
                                         <span style="background: #f1f3f5; padding: 2px 8px; border-radius: 4px; margin-right: 4px;">${s.mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret'}</span>
                                         <span style="background: #f1f3f5; padding: 2px 8px; border-radius: 4px;">0-${s.fret_max} frets</span>
