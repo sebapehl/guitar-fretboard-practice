@@ -398,6 +398,65 @@
             .setting-range { width: 100%; border-bottom: 1px solid #eee; padding-bottom: 8px; }
             .setting-toggle { border-left: none; padding-left: 0; width: 100%; justify-content: center; min-height: 36px; }
         }
+
+        /* Multi-range slider styles */
+        .range-slider {
+            position: relative;
+            width: 100%;
+            height: 40px;
+            display: flex;
+            align-items: center;
+        }
+        .range-slider input[type="range"] {
+            pointer-events: none;
+            position: absolute;
+            left: 0;
+            width: 100%;
+            outline: none;
+            height: 0;
+            margin: 0;
+            -webkit-appearance: none;
+        }
+        .range-slider input[type="range"]::-webkit-slider-thumb {
+            pointer-events: all;
+            position: relative;
+            z-index: 2;
+            outline: 0;
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #FF5A5F;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            transition: transform 0.1s ease;
+        }
+        .range-slider input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+        .range-slider input[type="range"]::-moz-range-thumb {
+            pointer-events: all;
+            position: relative;
+            z-index: 2;
+            outline: 0;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #FF5A5F;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+        }
+        .slider-track {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #ddd;
+            border-radius: 2px;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
@@ -521,9 +580,13 @@
             <div id="fretboard-ui"></div>
 
             <div id="game-settings" class="game-settings">
-                <div class="setting-range" style="border-right: none; padding-right: 0;">
+                <div class="setting-range" style="border-right: none; padding-right: 0; flex-direction: column; align-items: flex-start; gap: 4px;">
                     <label style="font-weight: 600; white-space: nowrap;">Fret Range: <span id="fret-range-val">0 - 12</span></label>
-                    <input type="range" id="setting-fret-max" min="1" max="22" value="12" style="flex: 1; cursor: pointer;">
+                    <div class="range-slider">
+                        <div class="slider-track" id="slider-track"></div>
+                        <input type="range" id="setting-fret-min" min="0" max="22" value="0">
+                        <input type="range" id="setting-fret-max" min="0" max="22" value="12">
+                    </div>
                 </div>
             </div>
 
@@ -787,10 +850,12 @@
         function showView(viewName) {
             // Reset fret range to standard 0-12 on every view change
             state.fretRange = [0, 12];
-            const fretSlider = document.getElementById('setting-fret-max');
-            if (fretSlider) {
-                fretSlider.value = 12;
-                document.getElementById('fret-range-val').innerText = '0 - 12';
+            const minSlider = document.getElementById('setting-fret-min');
+            const maxSlider = document.getElementById('setting-fret-max');
+            if (minSlider && maxSlider) {
+                minSlider.value = 0;
+                maxSlider.value = 12;
+                updateFretRange();
             }
 
             landingView.style.display = viewName === 'landing' ? 'block' : 'none';
@@ -1296,7 +1361,7 @@
             logDebug(`saveScore called (score: ${state.score}/${state.rounds})`);
             // Local storage PB (only for perfect scores)
             if (state.score === state.rounds) {
-                const key = `pb_${state.mode}_${state.fretRange[1]}`;
+                const key = `pb_${state.mode}_${state.fretRange[0]}_${state.fretRange[1]}`;
                 const currentPB = localStorage.getItem(key);
                 if (!currentPB || time < parseFloat(currentPB)) {
                     localStorage.setItem(key, time.toString());
@@ -1386,7 +1451,7 @@
         }
 
         function loadPB() {
-            const key = `pb_${state.mode}_${state.fretRange[1]}`;
+            const key = `pb_${state.mode}_${state.fretRange[0]}_${state.fretRange[1]}`;
             return localStorage.getItem(key);
         }
 
@@ -1394,21 +1459,54 @@
             const pb = loadPB();
             const modeName = state.mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret';
             if (pb) {
-                pbEl.innerText = `Personal Best (${modeName}, 0-${state.fretRange[1]}): ${parseFloat(pb).toFixed(2)}s`;
+                pbEl.innerText = `Personal Best (${modeName}, ${state.fretRange[0]}-${state.fretRange[1]}): ${parseFloat(pb).toFixed(2)}s`;
             } else {
                 pbEl.innerText = '';
             }
         }
 
         // Settings logic (now inline)
-        document.getElementById('setting-fret-max').addEventListener('input', (e) => {
-            const max = parseInt(e.target.value);
-            document.getElementById('fret-range-val').innerText = `0 - ${max}`;
-            state.fretRange = [0, max];
+        const minSlider = document.getElementById('setting-fret-min');
+        const maxSlider = document.getElementById('setting-fret-max');
+        const rangeVal = document.getElementById('fret-range-val');
+        const sliderTrack = document.getElementById('slider-track');
+
+        function updateFretRange(e) {
+            let min = parseInt(minSlider.value);
+            let max = parseInt(maxSlider.value);
+            
+            if (min > max) {
+                if (e && e.target.id === 'setting-fret-min') {
+                    maxSlider.value = min;
+                    max = min;
+                } else {
+                    minSlider.value = max;
+                    min = max;
+                }
+            }
+            
+            // Update track highlight
+            const percent1 = (min / 22) * 100;
+            const percent2 = (max / 22) * 100;
+            sliderTrack.style.background = `linear-gradient(to right, #ddd ${percent1}%, #FF5A5F ${percent1}%, #FF5A5F ${percent2}%, #ddd ${percent2}%)`;
+
+            rangeVal.innerText = `${min} - ${max}`;
+            state.fretRange = [min, max];
             if (state.status !== 'playing') {
                 updatePBDisplay();
                 ui.render();
             }
+        }
+
+        minSlider.addEventListener('input', (e) => {
+            updateFretRange(e);
+            minSlider.style.zIndex = '3';
+            maxSlider.style.zIndex = '2';
+        });
+        maxSlider.addEventListener('input', (e) => {
+            updateFretRange(e);
+            minSlider.style.zIndex = '2';
+            maxSlider.style.zIndex = '3';
         });
 
         startBtn.addEventListener('click', startCountdown);
