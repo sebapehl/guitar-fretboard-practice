@@ -642,8 +642,6 @@
         </div>
     </div>
 
-    <div id="debug-console"></div>
-
     <div class="game-over-overlay" id="game-over-screen">
         <h1>ROUND COMPLETE!</h1>
         <div class="final-stats" id="final-stats-text">
@@ -729,13 +727,7 @@
         let currentUser = null;
         let profileSynced = false;
 
-        function logDebug(msg) {
-            console.log(msg);
-            const debugEl = document.getElementById('debug-console');
-            debugEl.style.display = 'block';
-            debugEl.innerHTML += `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>`;
-            debugEl.scrollTop = debugEl.scrollHeight;
-        }
+        function logDebug(msg) {}
 
         async function withTimeout(promise, ms = 20000) {
             let timeoutId;
