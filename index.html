@@ -912,7 +912,7 @@
                     const rootNote = getNoteAt(STRINGS[s].open, f);
                     const octaves = [];
                     for (let stringIdx = 0; stringIdx < 6; stringIdx++) {
-                        for (let fret = 0; fret <= 12; fret++) {
+                        for (let fret = 0; fret <= 22; fret++) {
                             if (getNoteAt(STRINGS[stringIdx].open, fret) === rootNote) {
                                 octaves.push({
                                     stringIdx,
