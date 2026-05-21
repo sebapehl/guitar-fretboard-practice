@@ -18,6 +18,10 @@
             --radius: 16px;
             --shadow: 0 6px 16px rgba(0,0,0,0.08);
         }
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
         body {
             font-family: Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
@@ -30,6 +34,9 @@
             padding: 20px;
             padding-top: 80px;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            width: 100%;
+            overscroll-behavior: none;
         }
 
         /* Burger Menu & Header */
@@ -384,7 +391,7 @@
         @media (max-width: 600px) {
             .note-buttons { grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
             .container { padding: 0.5rem 1rem; border-radius: 0; box-shadow: none; border: none; background: transparent; }
-            body { padding-top: 60px; background: white; padding-left: 10px; padding-right: 10px; }
+            body { padding-top: 60px; background: white; padding-left: 10px; padding-right: 10px; overflow-x: hidden; }
             .challenge-display { font-size: 1rem; padding: 0.5rem; margin-bottom: 0.5rem; }
             h2 { font-size: 1.2rem; }
             .stats-bar { margin-bottom: 5px; padding: 6px; font-size: 0.85rem; }
