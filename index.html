@@ -1002,23 +1002,21 @@
                     const scaleValues = scaleNames.map(name => NOTE_VALUES[name]);
 
                     const highlights = [];
-                    for (let stringIdx = 0; stringIdx < 6; stringIdx++) {
-                        for (let fret = 0; fret <= 22; fret++) {
-                            const noteName = getNoteAt(STRINGS[stringIdx].open, fret);
-                            const noteVal = NOTE_VALUES[noteName];
+                    for (let fret = 0; fret <= 22; fret++) {
+                        const noteName = getNoteAt(STRINGS[s].open, fret);
+                        const noteVal = NOTE_VALUES[noteName];
+                        
+                        if (scaleValues.includes(noteVal)) {
+                            const isRoot = noteVal === scaleValues[0];
+                            // Find the correctly spelled name for this note in this scale
+                            const name = scaleNames.find(n => NOTE_VALUES[n] === noteVal);
                             
-                            if (scaleValues.includes(noteVal)) {
-                                const isRoot = noteVal === scaleValues[0];
-                                // Find the correctly spelled name for this note in this scale
-                                const name = scaleNames.find(n => NOTE_VALUES[n] === noteVal);
-                                
-                                highlights.push({
-                                    stringIdx,
-                                    fret,
-                                    color: isRoot ? 'var(--primary)' : 'var(--accent-green)',
-                                    label: name
-                                });
-                            }
+                            highlights.push({
+                                stringIdx: s,
+                                fret,
+                                color: isRoot ? 'var(--primary)' : 'var(--accent-green)',
+                                label: name
+                            });
                         }
                     }
 
