@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Fretboard Mastery</title>
+    <title>FretboardBattle</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         *, *::before, *::after {
@@ -476,7 +476,7 @@
             <span></span>
             <span></span>
         </div>
-        <h2 id="header-title" style="cursor: pointer; flex: 1;">Fretboard Mastery</h2>
+        <h2 id="header-title" style="cursor: pointer; flex: 1;">FretboardBattle</h2>
         <button id="sound-toggle-btn" class="btn btn-secondary" style="margin-right: 15px; padding: 8px 16px; border-radius: 50px; font-size: 0.8rem; background: #f1f3f5; color: var(--text);">
             🔈 Sound: Off
         </button>
@@ -513,7 +513,7 @@
         </div>
 
         <div id="about-view" style="display: none; text-align: left;">
-            <h2>About Fretboard Mastery</h2>
+            <h2>About FretboardBattle</h2>
             <p>A minimalist tool designed to help guitarists internalize the fretboard through gamified speed drills.</p>
             <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">Built with Vanilla JS and Supabase.</p>
         </div>
@@ -625,7 +625,7 @@
             <div id="db-status" style="font-size: 0.8rem; margin-top: 5px; min-height: 1rem;"></div>
 
             <div class="controls" id="main-controls">
-                <button class="btn" id="start-btn">Start Sprint</button>
+                <button class="btn" id="start-btn">Enter Battle</button>
             </div>
 
             <div class="pb-display" id="pb-text"></div>
@@ -1299,11 +1299,11 @@
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     if (result.correct) {
-                        feedbackEl.innerText = "Correct! ✅";
+                        feedbackEl.innerText = "HIT! ✅";
                         feedbackEl.style.color = "var(--accent-green)";
                         feedbackEl.classList.add('success-animate');
                     } else {
-                        feedbackEl.innerText = `Missed! ${state.mode === 'identify' ? 'It was ' + state.currentChallenge.correctNote : ''} ❌`;
+                        feedbackEl.innerText = `MISS! ${state.mode === 'identify' ? 'It was ' + state.currentChallenge.correctNote : ''} ❌`;
                         feedbackEl.style.color = "var(--primary)";
                         feedbackEl.classList.add('error-animate');
                     }
@@ -1394,7 +1394,7 @@
             state.currentChallenge = null;
             activeGameControls.style.display = 'none';
             startBtn.style.display = 'block';
-            startBtn.innerText = 'Start Sprint';
+            startBtn.innerText = 'Enter Battle';
             challengeEl.style.fontSize = '1.1rem';
         }
 
