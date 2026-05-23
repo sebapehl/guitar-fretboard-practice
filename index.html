@@ -1118,7 +1118,7 @@
                                 </div>
                                 <div style="text-align: right; flex-shrink: 0;">
                                     <div style="font-size: 0.65rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: -2px;">Score</div>
-                                    <div style="font-weight: 800; font-size: 1.1rem; color: var(--accent-green);">${Math.round(s.mastery_score || 0)}</div>
+                                    <div style="font-weight: 800; font-size: 1.1rem; color: var(--accent-green);">${(s.mastery_score || 0).toFixed(3)}</div>
                                     <div style="font-size: 0.75rem; color: var(--text-muted);">${(s.total_time_ms / 1000).toFixed(2)}s</div>
                                 </div>
                             </div>
