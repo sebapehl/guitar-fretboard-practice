@@ -587,6 +587,17 @@
                     We reward you for practicing larger ranges because searching the whole neck is exponentially harder. 
                     By applying a 1.5x complexity multiplier to your fret span, a <strong>12-fret range</strong> gives you about a <strong>5x higher score potential</strong> than a 4-fret range for the same speed. This ensures that mastering the full neck is always more valuable than sprinting in a small area.
                 </p>
+                <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.8rem; border-top: 1px solid #ebebeb; padding-top: 15px;">
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-weight: 800; color: #ffc107;">GRANDMASTER (500+)</span>
+                        <span style="font-weight: 800; color: #00A699;">SENSEI (300+)</span>
+                        <span style="font-weight: 800; color: #FF5A5F;">SHREDDER (150+)</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 4px;">
+                        <span style="font-weight: 800; color: #484848;">DUELIST (50+)</span>
+                        <span style="font-weight: 800; color: #717171;">NOVICE (0+)</span>
+                    </div>
+                </div>
             </div>
         </div>
         <div id="game-view">
@@ -660,7 +671,10 @@
     </div>
 
     <div class="game-over-overlay" id="game-over-screen">
-        <h1>ROUND COMPLETE!</h1>
+        <h1 id="battle-result-title">ROUND COMPLETE!</h1>
+        <div id="earned-rank-display" style="margin-bottom: 10px; font-weight: 800; font-size: 1.8rem; text-transform: uppercase; letter-spacing: 0.1em;">
+            <!-- Rank title injected here -->
+        </div>
         <div class="final-stats" id="final-stats-text">
             Score: 10/10 in 12.34s
         </div>
@@ -774,6 +788,14 @@
             return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         }
 
+        function getMasteryRank(score) {
+            if (score >= 500) return { title: 'Legendary Grandmaster', color: '#ffc107' };
+            if (score >= 300) return { title: 'Fretboard Sensei', color: '#00A699' };
+            if (score >= 150) return { title: 'Neck Shredder', color: '#FF5A5F' };
+            if (score >= 50) return { title: 'Fretboard Duelist', color: '#484848' };
+            return { title: 'Novice', color: '#717171' };
+        }
+
         // DOM Elements
         const landingView = document.getElementById('landing-view');
         const gameView = document.getElementById('game-view');
@@ -831,6 +853,8 @@
         const rankDisplayEl = document.getElementById('rank-display');
         const playAgainBtn = document.getElementById('play-again-btn');
         const closeOverlayBtn = document.getElementById('close-overlay-btn');
+        const earnedRankDisplay = document.getElementById('earned-rank-display');
+        const battleResultTitle = document.getElementById('battle-result-title');
 
         // Leaderboard DOM
         const leaderboardListEl = document.getElementById('leaderboard-list');
@@ -1107,7 +1131,8 @@
                                         <div style="font-weight: 800; font-size: 1rem; color: var(--text);">${s.profiles?.username || 'Anonymous'}</div>
                                         <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;">${formatRelativeTime(s.created_at)}</div>
                                     </div>
-                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
+                                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px; display: flex; align-items: center; gap: 8px;">
+                                        <span style="color: ${getMasteryRank(s.mastery_score).color}; font-weight: 800; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.05em;">${getMasteryRank(s.mastery_score).title}</span>
                                         <span style="background: #f1f3f5; padding: 2px 8px; border-radius: 4px;">${s.fret_min || 0}-${s.fret_max} frets</span>
                                     </div>
                                 </div>
@@ -1406,16 +1431,25 @@
             clearInterval(timerInterval);
             const totalTime = state.getTotalTime();
             timerEl.innerText = `${totalTime.toFixed(2)}s`;
-            challengeEl.innerText = "Round Complete!";
+            challengeEl.innerText = "Battle Complete!";
             feedbackEl.innerText = `Final: ${state.score}/${state.rounds} in ${totalTime.toFixed(2)}s`;
 
             startBtn.style.display = 'block';
-            startBtn.innerText = 'Go Again';
+            startBtn.innerText = 'Battle Again';
             activeGameControls.style.display = 'none';
             noteInputEl.style.display = 'none';
             
+            // Calculate Mastery Rank
+            const span = state.fretRange[1] - state.fretRange[0] + 1;
+            const complexity = Math.pow(span, 1.5);
+            const masteryScore = (complexity * 10000) / (totalTime * 1000);
+            const rank = getMasteryRank(masteryScore);
+
             // Show overlay
-            finalStatsText.innerText = `Final Score: ${state.score}/${state.rounds} in ${totalTime.toFixed(2)}s`;
+            battleResultTitle.innerText = "BATTLE COMPLETE!";
+            earnedRankDisplay.innerText = rank.title;
+            earnedRankDisplay.style.color = rank.color;
+            finalStatsText.innerText = `Mastery Score: ${masteryScore.toFixed(3)} (${totalTime.toFixed(2)}s)`;
             gameOverScreen.style.display = 'flex';
 
             saveScore(totalTime);
@@ -1536,7 +1570,13 @@
             const pb = loadPB();
             const modeName = state.mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret';
             if (pb) {
-                pbEl.innerText = `Personal Best (${modeName}, ${state.fretRange[0]}-${state.fretRange[1]}): ${parseFloat(pb).toFixed(2)}s`;
+                const time = parseFloat(pb);
+                const span = state.fretRange[1] - state.fretRange[0] + 1;
+                const complexity = Math.pow(span, 1.5);
+                const masteryScore = (complexity * 10000) / (time * 1000);
+                const rank = getMasteryRank(masteryScore);
+                
+                pbEl.innerHTML = `Personal Best: <strong>${time.toFixed(2)}s</strong> <span style="margin-left: 8px; font-weight: 800; color: ${rank.color}; text-transform: uppercase; font-size: 0.7rem;">${rank.title}</span>`;
             } else {
                 pbEl.innerText = '';
             }
