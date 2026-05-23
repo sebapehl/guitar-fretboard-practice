@@ -11,12 +11,27 @@ const LETTERS = ["C", "D", "E", "F", "G", "A", "B"];
  * Follows the rule: each letter name A-G must be used exactly once.
  */
 export function getMajorScale(rootName) {
+    // Standardize root name and handle complex enharmonic scales
+    // We prefer Bb over A#, Eb over D#, etc. for standard major scales.
+    const rootMap = {
+        "A#": "Bb",
+        "D#": "Eb",
+        "G#": "Ab",
+        "C#": "Db",
+        "F#": "Gb"
+    };
+
+    let normalizedRoot = rootName[0].toUpperCase() + rootName.slice(1).toLowerCase();
+    if (rootMap[normalizedRoot.toUpperCase()]) {
+        normalizedRoot = rootMap[normalizedRoot.toUpperCase()];
+    }
+
     const intervals = [0, 2, 4, 5, 7, 9, 11];
-    const rootValue = NOTE_VALUES[rootName[0].toUpperCase() + rootName.slice(1).toLowerCase()] || NOTE_VALUES[rootName.toUpperCase()];
+    const rootValue = NOTE_VALUES[normalizedRoot];
     if (rootValue === undefined) return null;
 
     // Find the starting letter index (0 for C, 1 for D, etc.)
-    const rootLetter = rootName[0].toUpperCase();
+    const rootLetter = normalizedRoot[0].toUpperCase();
     let letterIdx = LETTERS.indexOf(rootLetter);
 
     return intervals.map(interval => {
@@ -25,7 +40,6 @@ export function getMajorScale(rootName) {
         letterIdx++;
 
         // Find which accidental (if any) makes targetLetter match targetValue
-        // e.g. if targetValue is 10 (Bb/A#) and targetLetter is B, we need 'b'
         const baseValue = NOTE_VALUES[targetLetter];
         let diff = targetValue - baseValue;
         
