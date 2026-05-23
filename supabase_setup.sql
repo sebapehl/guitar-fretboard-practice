@@ -14,7 +14,9 @@ CREATE TABLE scores (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
     mode TEXT NOT NULL, -- 'identify' or 'locate'
+    fret_min INTEGER DEFAULT 0,
     fret_max INTEGER NOT NULL,
+    mastery_score FLOAT DEFAULT 0,
     is_positional BOOLEAN DEFAULT FALSE,
     anchor_fret INTEGER,
     total_time_ms FLOAT NOT NULL,
@@ -22,6 +24,8 @@ CREATE TABLE scores (
     history JSONB, -- Storing full round history for anti-cheat verification
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+CREATE INDEX idx_scores_mastery ON scores(mastery_score DESC);
 
 -- 3. Create Duels Table (Realtime)
 CREATE TABLE duels (

@@ -578,9 +578,9 @@
                     How rankings work
                 </h4>
                 <p style="margin: 0;">
-                    The leaderboard shows the <strong>fastest perfect rounds (10/10)</strong>. 
-                    Currently, scores are ranked purely by <strong>total time</strong>, regardless of the fret range selected. 
-                    A 5-second round on frets 0-5 carries the same weight as a 5-second round on frets 0-22.
+                    The leaderboard ranks the <strong>highest Fretboard Mastery Scores</strong>. 
+                    The score factors in both <strong>speed</strong> and <strong>complexity</strong>. 
+                    Practicing on a larger fret range provides a significant multiplier to your score, as searching the entire neck is exponentially harder than focusing on a small area.
                 </p>
             </div>
         </div>
@@ -1043,7 +1043,7 @@
                     .from('scores')
                     .select('*, profiles(username)')
                     .eq('accuracy', 1) 
-                    .order('total_time_ms', { ascending: true })
+                    .order('mastery_score', { ascending: false })
                     .limit(10);
 
                 if (timeFilter !== 'all') {
@@ -1084,11 +1084,12 @@
                                     </div>
                                     <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 2px;">
                                         <span style="background: #f1f3f5; padding: 2px 8px; border-radius: 4px; margin-right: 4px;">${s.mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret'}</span>
-                                        <span style="background: #f1f3f5; padding: 2px 8px; border-radius: 4px;">0-${s.fret_max} frets</span>
+                                        <span style="background: #f1f3f5; padding: 2px 8px; border-radius: 4px;">${s.fret_min || 0}-${s.fret_max} frets</span>
                                     </div>
                                 </div>
-                                <div style="text-align: right; font-weight: 800; font-size: 1.1rem; color: var(--accent-green); flex-shrink: 0;">
-                                    ${(s.total_time_ms / 1000).toFixed(2)}s
+                                <div style="text-align: right; flex-shrink: 0;">
+                                    <div style="font-weight: 800; font-size: 1.1rem; color: var(--accent-green);">${Math.round(s.mastery_score || 0)}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);">${(s.total_time_ms / 1000).toFixed(2)}s</div>
                                 </div>
                             </div>
                         `).join('')}
@@ -1426,10 +1427,16 @@
             if (currentUser) {
                 logDebug('Attempting cloud save...');
                 try {
+                    const span = state.fretRange[1] - state.fretRange[0] + 1;
+                    const complexity = Math.pow(span, 1.5);
+                    const masteryScore = (complexity * 10000) / (time * 1000);
+
                     const scoreData = {
                         user_id: currentUser.id,
                         mode: state.mode,
+                        fret_min: state.fretRange[0],
                         fret_max: state.fretRange[1],
+                        mastery_score: masteryScore,
                         total_time_ms: time * 1000,
                         accuracy: state.score / state.rounds,
                         history: state.history
