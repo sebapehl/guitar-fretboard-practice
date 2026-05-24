@@ -1483,6 +1483,11 @@
             finalStatsText.innerText = `Mastery Score: ${masteryScore.toFixed(3)} (${totalTime.toFixed(2)}s)`;
             gameOverScreen.style.display = 'flex';
 
+            // Always fetch rank for perfect games, even for anonymous users
+            if (state.score === state.rounds) {
+                fetchRanks(masteryScore);
+            }
+
             saveScore(totalTime);
             updatePBDisplay();
             ui.render();
@@ -1536,11 +1541,6 @@
                     if (error) throw error;
                     dbStatusEl.innerText = '';
                     logDebug('Cloud save SUCCESS');
-
-                    // If it was a perfect game, fetch rank
-                    if (state.score === state.rounds) {
-                        fetchRanks(scoreData.mastery_score);
-                    }
                 } catch (err) {
                     dbStatusEl.innerText = `❌ Cloud sync failed: ${err.message}`;
                     dbStatusEl.style.color = 'red';
@@ -1573,17 +1573,20 @@
                     .eq('accuracy', 1)
                     .eq('mode', state.mode));
 
-                // 3. Personal Rank
-                const { count: personalBetter } = await withTimeout(supabase
-                    .from('scores')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('user_id', currentUser.id)
-                    .eq('accuracy', 1)
-                    .eq('mode', state.mode)
-                    .gt('mastery_score', masteryScore));
+                // 3. Personal Rank (only if logged in)
+                let personalRank = null;
+                if (currentUser) {
+                    const { count: personalBetter } = await withTimeout(supabase
+                        .from('scores')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('user_id', currentUser.id)
+                        .eq('accuracy', 1)
+                        .eq('mode', state.mode)
+                        .gt('mastery_score', masteryScore));
+                    personalRank = (personalBetter || 0) + 1;
+                }
 
                 const globalRank = (globalBetter || 0) + 1;
-                const personalRank = (personalBetter || 0) + 1;
                 const percentile = totalPerfect > 0 ? (1 - (globalRank / totalPerfect)) * 100 : 0;
                 const rank = getMasteryRank(percentile);
 
@@ -1594,9 +1597,15 @@
                     <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">
                         Global Rank: #${globalRank} (Top ${Math.max(0.1, (100 - percentile)).toFixed(1)}%)
                     </div>
+                    ${personalRank ? `
                     <div style="font-size: 0.9rem; opacity: 0.9;">
                         Personal Rank: #${personalRank}
                     </div>
+                    ` : `
+                    <div style="font-size: 0.8rem; opacity: 0.7; color: #fff;">
+                        Login to save your rank!
+                    </div>
+                    `}
                 `;
                 logDebug(`Ranks fetched: Global #${globalRank}, Personal #${personalRank}, Percentile: ${percentile}%`);
             } catch (err) {
