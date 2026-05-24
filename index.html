@@ -682,7 +682,7 @@
             <!-- Rank info injected here -->
         </div>
         <div class="controls">
-            <button class="btn" id="play-again-btn">Play Again</button>
+            <button class="btn" id="play-again-btn">Battle Again</button>
             <button class="btn btn-secondary" id="close-overlay-btn">Close</button>
         </div>
     </div>
@@ -1277,7 +1277,7 @@
 
             statsBar.classList.remove('visible');
             startBtn.style.display = 'block';
-            startBtn.innerText = `Start ${mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret'} Sprint`;
+            startBtn.innerText = `Enter ${mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret'} Battle`;
             noteInputEl.style.display = 'none';
             challengeEl.innerHTML = mode === 'identify' ? "Identify the highlighted fret!" : "Locate the given note on the string!";
             pbEl.style.display = 'block';
