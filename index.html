@@ -467,6 +467,20 @@
             border-radius: 2px;
             z-index: 1;
         }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+        @keyframes pulse-hit {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); color: var(--accent-green); }
+            100% { transform: scale(1); }
+        }
+        .hit-effect { animation: pulse-hit 0.3s ease-out; }
+        .miss-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
     </style>
 </head>
 <body>
@@ -1337,11 +1351,13 @@
                     if (result.correct) {
                         feedbackEl.innerText = "HIT! ✅";
                         feedbackEl.style.color = "var(--accent-green)";
-                        feedbackEl.classList.add('success-animate');
+                        feedbackEl.classList.add('success-animate', 'hit-effect');
+                        setTimeout(() => feedbackEl.classList.remove('hit-effect'), 300);
                     } else {
                         feedbackEl.innerText = `MISS! ${state.mode === 'identify' ? 'It was ' + state.currentChallenge.correctNote : ''} ❌`;
                         feedbackEl.style.color = "var(--primary)";
-                        feedbackEl.classList.add('error-animate');
+                        feedbackEl.classList.add('error-animate', 'miss-effect');
+                        setTimeout(() => feedbackEl.classList.remove('miss-effect'), 400);
                     }
                 });
             });
