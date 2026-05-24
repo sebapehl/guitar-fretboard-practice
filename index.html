@@ -481,6 +481,7 @@
         }
         .hit-effect { animation: pulse-hit 0.3s ease-out !important; }
         .miss-effect { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both !important; }
+        .screen-shake { animation: shake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
     </style>
 </head>
 <body>
@@ -1357,7 +1358,11 @@
                         feedbackEl.innerText = `MISS! ${state.mode === 'identify' ? 'It was ' + state.currentChallenge.correctNote : ''} ❌`;
                         feedbackEl.style.color = "var(--primary)";
                         feedbackEl.classList.add('error-animate', 'miss-effect');
-                        setTimeout(() => feedbackEl.classList.remove('miss-effect'), 400);
+                        document.body.classList.add('screen-shake');
+                        setTimeout(() => {
+                            feedbackEl.classList.remove('miss-effect');
+                            document.body.classList.remove('screen-shake');
+                        }, 400);
                     }
                 });
             });
