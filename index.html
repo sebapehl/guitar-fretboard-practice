@@ -24,10 +24,10 @@
         html {
             overflow-x: hidden;
             width: 100%;
+            background-color: var(--bg);
         }
         body {
             font-family: Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
             color: var(--text);
             display: flex;
             flex-direction: column;
@@ -40,27 +40,24 @@
             overflow-x: hidden;
             width: 100%;
             overscroll-behavior-x: none;
+            background: transparent;
         }
-        body::before {
-            content: "";
+        .bg-guitar {
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 100%;
-            height: 100%;
-            /* Full Telecaster Silhouette: Centered, both sides visible */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 500'%3E%3Cpath d='M90,0 C105,0 110,10 105,30 C102,45 98,50 98,80 L98,280 C130,285 155,310 155,380 C155,480 110,500 100,500 C90,500 45,480 45,380 C45,320 60,300 102,295 L102,80 C102,50 100,45 92,30 C87,10 95,0 110,0' fill='%23FF5A5F' fill-opacity='0.1'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: auto 90vh;
+            height: 90vh;
             z-index: -1;
             pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-        @media (max-width: 600px) {
-            body::before {
-                background-size: auto 80vh;
-                opacity: 0.8; /* Keep faint on mobile */
-            }
+        .bg-guitar svg {
+            height: 100%;
+            width: auto;
         }
 
         /* Burger Menu & Header */
@@ -506,6 +503,18 @@
     </style>
 </head>
 <body>
+    <div class="bg-guitar">
+        <svg viewBox="0 0 200 600" xmlns="http://www.w3.org/2000/svg">
+            <!-- Full Telecaster Silhouette: Both sides, single cutaway -->
+            <path d="M100,0 L110,0 L110,300 
+                     L170,300 C190,300 200,320 200,380 
+                     C200,550 140,600 100,600 
+                     C60,600 0,550 0,380 
+                     C0,320 30,300 60,300 
+                     L90,300 L90,0 Z" 
+                  fill="var(--primary)" opacity="0.1" />
+        </svg>
+    </div>
     <header>
         <div class="burger-icon" id="burger-btn">
             <span></span>
