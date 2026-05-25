@@ -1558,36 +1558,22 @@
                 logDebug('Fetching ranks...');
                 rankDisplayEl.innerHTML = '<p style="font-size: 0.8rem;">Calculating rank...</p>';
 
-                // 1. Better scores count
-                const { count: globalBetter } = await withTimeout(supabase
-                    .from('scores')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('accuracy', 1)
-                    .eq('mode', state.mode)
-                    .gt('mastery_score', masteryScore));
+                // Run queries in parallel
+                const [globalBetterRes, totalPerfectRes, personalBetterRes] = await Promise.all([
+                    withTimeout(supabase.from('scores').select('*', { count: 'exact', head: true }).eq('accuracy', 1).eq('mode', state.mode).gt('mastery_score', masteryScore)),
+                    withTimeout(supabase.from('scores').select('*', { count: 'exact', head: true }).eq('accuracy', 1).eq('mode', state.mode)),
+                    currentUser ? withTimeout(supabase.from('scores').select('*', { count: 'exact', head: true }).eq('user_id', currentUser.id).eq('accuracy', 1).eq('mode', state.mode).gt('mastery_score', masteryScore)) : Promise.resolve({ count: 0 })
+                ]);
 
-                // 2. Total perfect scores count (to calculate percentile)
-                const { count: totalPerfect } = await withTimeout(supabase
-                    .from('scores')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('accuracy', 1)
-                    .eq('mode', state.mode));
+                if (globalBetterRes.error) throw globalBetterRes.error;
+                if (totalPerfectRes.error) throw totalPerfectRes.error;
 
-                // 3. Personal Rank (only if logged in)
-                let personalRank = null;
-                if (currentUser) {
-                    const { count: personalBetter } = await withTimeout(supabase
-                        .from('scores')
-                        .select('*', { count: 'exact', head: true })
-                        .eq('user_id', currentUser.id)
-                        .eq('accuracy', 1)
-                        .eq('mode', state.mode)
-                        .gt('mastery_score', masteryScore));
-                    personalRank = (personalBetter || 0) + 1;
-                }
+                const globalRank = (globalBetterRes.count || 0) + 1;
+                const totalPerfect = (totalPerfectRes.count || 0) + 1; // Include current attempt
+                const personalRank = (personalBetterRes.count || 0) + 1;
 
-                const globalRank = (globalBetter || 0) + 1;
-                const percentile = totalPerfect > 0 ? (1 - (globalRank / totalPerfect)) * 100 : 0;
+                // Better percentile logic: top player is always Top 1% if they are the only one
+                const percentile = totalPerfect > 1 ? (1 - (globalRank / totalPerfect)) * 100 : 99.9;
                 const rank = getMasteryRank(percentile);
 
                 earnedRankDisplay.innerText = rank.title;
@@ -1597,7 +1583,7 @@
                     <div style="color: #ffc107; font-weight: bold; margin-bottom: 5px;">
                         Global Rank: #${globalRank} (Top ${Math.max(0.1, (100 - percentile)).toFixed(1)}%)
                     </div>
-                    ${personalRank ? `
+                    ${currentUser ? `
                     <div style="font-size: 0.9rem; opacity: 0.9;">
                         Personal Rank: #${personalRank}
                     </div>
@@ -1607,10 +1593,12 @@
                     </div>
                     `}
                 `;
-                logDebug(`Ranks fetched: Global #${globalRank}, Personal #${personalRank}, Percentile: ${percentile}%`);
+                logDebug(`Ranks fetched: Global #${globalRank}, Total: ${totalPerfect}, Percentile: ${percentile.toFixed(2)}%`);
             } catch (err) {
-                logDebug(`Rank fetch failed: ${err.message}`);
+                console.error('Rank fetch error:', err);
                 earnedRankDisplay.innerText = "RANK TBD";
+                earnedRankDisplay.style.color = "var(--text-muted)";
+                rankDisplayEl.innerHTML = `<p style="font-size: 0.8rem; opacity: 0.7;">Unable to fetch community ranking.</p>`;
             }
         }
 
