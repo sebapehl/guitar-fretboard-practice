@@ -45,20 +45,21 @@
         .bg-guitar {
             position: fixed;
             top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
+            left: 0;
+            transform: translateY(-50%);
+            width: auto;
             height: 100%;
             z-index: -1;
             pointer-events: none;
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
-            opacity: 0.12;
+            opacity: 0.15;
         }
         .bg-guitar svg {
-            height: 80vh;
+            height: 90vh;
             width: auto;
+            margin-left: -10vh; /* Peek from the left */
         }
 
         /* Burger Menu & Header */
@@ -505,9 +506,9 @@
 </head>
 <body>
     <div class="bg-guitar">
-        <!-- Exact Telecaster paths provided by user, rotated 90 degrees within the SVG coordinate space to prevent distortion -->
+        <!-- Exact Telecaster paths provided by user, rotated -90 degrees to point headstock down -->
         <svg viewBox="0 0 743 2007" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-            <g transform="rotate(90, 371.5, 371.5) translate(0, -600)">
+            <g transform="rotate(-90, 371.5, 1003.5) translate(0, 600)">
                 <path d="M0,474.26c0.25-4.08-0.23-8.62,2.52-12c2.97,2.87,5.85,5.82,8.76,8.74c0.04,0.62,0.11,1.85,0.14,2.47
                         c1.35,0,2.7,0.02,4.05,0.05c0.51-1.18,1.04-2.34,1.57-3.5c0.26,6.43,1.38,13.21-0.67,19.43c-0.14-0.84-0.44-2.51-0.59-3.35
                         c-1.42,0-2.85,0.01-4.27,0.03c-0.09,0.62-0.27,1.87-0.36,2.5c-2.96,2.91-5.77,5.98-8.92,8.7c-2.21-4.2-2.06-9.02-2.23-13.63V474.26z" 
