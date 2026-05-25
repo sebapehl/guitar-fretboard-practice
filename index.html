@@ -48,7 +48,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: 100%;
-            height: 90vh;
+            height: 100%;
             z-index: -1;
             pointer-events: none;
             display: flex;
@@ -56,8 +56,9 @@
             align-items: center;
         }
         .bg-guitar svg {
-            height: 100%;
+            height: 85vh;
             width: auto;
+            max-width: 90vw;
         }
 
         /* Burger Menu & Header */
@@ -504,15 +505,20 @@
 </head>
 <body>
     <div class="bg-guitar">
-        <svg viewBox="0 0 200 600" xmlns="http://www.w3.org/2000/svg">
-            <!-- Full Telecaster Silhouette: Both sides, single cutaway -->
-            <path d="M100,0 L110,0 L110,300 
-                     L170,300 C190,300 200,320 200,380 
-                     C200,550 140,600 100,600 
-                     C60,600 0,550 0,380 
-                     C0,320 30,300 60,300 
-                     L90,300 L90,0 Z" 
-                  fill="var(--primary)" opacity="0.1" />
+        <svg viewBox="0 0 200 600" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+            <!-- High-Fidelity Telecaster Silhouette -->
+            <path d="M100,20 
+                     C115,20 125,35 120,60 
+                     C118,80 110,90 108,110 
+                     L108,310 
+                     C155,310 185,345 185,410 
+                     C185,580 135,600 100,600 
+                     C65,600 15,580 15,410 
+                     C15,350 40,320 80,310 
+                     L92,310 L92,110 
+                     C90,90 82,80 80,60 
+                     C78,35 85,20 100,20 Z" 
+                  fill="var(--primary)" opacity="0.08" />
         </svg>
     </div>
     <header>
