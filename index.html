@@ -24,10 +24,10 @@
         html {
             overflow-x: hidden;
             width: 100%;
+            background-color: var(--bg);
         }
         body {
             font-family: Circular, -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
             color: var(--text);
             display: flex;
             flex-direction: column;
@@ -40,6 +40,7 @@
             overflow-x: hidden;
             width: 100%;
             overscroll-behavior-x: none;
+            background: transparent;
         }
 
         /* Burger Menu & Header */
@@ -490,26 +491,30 @@
             height: 100%;
             z-index: -1;
             pointer-events: none;
-            opacity: 0.8;
         }
         .bg-decoration svg {
             height: 100%;
             width: 50%;
-            transform: translateX(-20%);
+            opacity: 0.12;
         }
         @media (max-width: 600px) {
             .bg-decoration svg {
-                width: 80%;
-                transform: translateX(-30%);
+                width: 100%;
+                opacity: 0.08;
             }
         }
     </style>
 </head>
 <body>
     <div class="bg-decoration">
-        <svg viewBox="0 0 100 200" preserveAspectRatio="xMidYMid slice">
-            <path d="M-50,0 C-50,50 0,60 0,100 C0,140 -50,150 -50,200 L-100,200 L-100,0 Z" fill="rgba(255, 90, 95, 0.04)" />
-            <path d="M0,80 C10,80 20,85 20,100 C20,115 10,120 0,120" fill="none" stroke="rgba(255, 90, 95, 0.02)" stroke-width="1" />
+        <svg viewBox="0 0 100 200" preserveAspectRatio="none">
+            <!-- Stylized right half of a guitar body -->
+            <path d="M0,0 
+                     C50,0 80,40 80,70 
+                     C80,95 60,100 50,100 
+                     C65,100 90,110 90,150 
+                     C90,190 60,200 0,200 Z" 
+                  fill="var(--primary)" style="opacity: 0.5;" />
         </svg>
     </div>
     <header>
