@@ -907,6 +907,8 @@
         const restartBtn = document.getElementById('restart-btn');
         const cancelBtn = document.getElementById('cancel-btn');
         const pbEl = document.getElementById('pb-text');
+        const fretboardUiEl = document.getElementById('fretboard-ui');
+        const gameSettingsEl = document.getElementById('game-settings');
         const statsBar = document.getElementById('stats-bar');
         const dbStatusEl = document.getElementById('db-status');
         const burgerBtn = document.getElementById('burger-btn');
@@ -1369,6 +1371,9 @@
             statsBar.classList.remove('visible');
             startBtn.style.display = 'block';
             startBtn.innerText = `Enter ${mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret'} Battle`;
+            fretboardUiEl.style.display = 'block';
+            gameSettingsEl.style.display = 'flex';
+            challengeEl.style.display = 'block';
             noteInputEl.style.display = 'none';
             challengeEl.innerHTML = mode === 'identify' ? "Identify the highlighted fret!" : "Locate the given note on the string!";
             pbEl.style.display = 'block';
