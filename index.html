@@ -691,7 +691,7 @@
                 </div>
             </div>
         </div>
-        <div id="game-view">
+        <div id="game-view" style="display: none;">
             <div class="stats-bar" id="stats-bar">
                 <div id="round-indicator">Round 0/10</div>
                 <div class="timer" id="timer-display">00.00s</div>
@@ -699,16 +699,16 @@
             </div>
 
             <div class="challenge-display">
-                <div id="challenge-text">Ready?</div>
+                <div id="challenge-text" style="display: none;">Ready?</div>
                 <div id="active-game-controls" style="display: none; gap: 8px; margin-left: 10px;">
                     <button class="header-btn" id="restart-btn">Restart</button>
                     <button class="header-btn" id="cancel-btn">Cancel</button>
                 </div>
             </div>
 
-            <div id="fretboard-ui"></div>
+            <div id="fretboard-ui" style="display: none;"></div>
 
-            <div id="game-settings" class="game-settings">
+            <div id="game-settings" class="game-settings" style="display: none;">
                 <div class="setting-range" style="border-right: none; padding-right: 0; flex-direction: column; align-items: flex-start; gap: 4px;">
                     <label style="font-weight: 600; white-space: nowrap;">Fret Range: <span id="fret-range-val">0 - 12</span></label>
                     <div class="range-slider">
@@ -730,7 +730,7 @@
                 <button class="btn" id="start-btn">Enter Battle</button>
             </div>
 
-            <div class="pb-display" id="pb-text"></div>
+            <div class="pb-display" id="pb-text" style="display: none;"></div>
         </div>
 
         <div id="auth-view" style="display: none;">
