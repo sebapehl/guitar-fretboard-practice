@@ -1463,7 +1463,14 @@
                 challengeEl.onclick = null;
                 noteInputEl.style.display = 'grid';
             } else {
-                challengeEl.innerHTML = `Find&nbsp;<strong>${state.currentChallenge.correctNote}</strong>&nbsp;on string&nbsp;<strong>${state.currentChallenge.stringName}</strong>`;
+                const note = state.currentChallenge.correctNote;
+                const string = state.currentChallenge.stringName;
+                challengeEl.innerHTML = `
+                    <div style="display: flex; gap: 20px; justify-content: center; align-items: baseline;">
+                        <div style="font-size: 0.9rem; opacity: 0.7;">Note: <strong style="font-size: 2rem; color: var(--primary); margin-left: 5px;">${note}</strong></div>
+                        <div style="font-size: 0.9rem; opacity: 0.7;">String: <strong style="font-size: 2rem; color: var(--primary); margin-left: 5px;">${string}</strong></div>
+                    </div>
+                `;
                 challengeEl.style.cursor = 'default';
                 challengeEl.onclick = null;
                 noteInputEl.style.display = 'none';
