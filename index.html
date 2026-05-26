@@ -656,11 +656,18 @@
                 <button class="filter-btn" data-mode="locate">Note ➔ Fret</button>
             </div>
 
-            <div class="leaderboard-filters" id="lb-time-filters">
+            <div class="leaderboard-filters" id="lb-time-filters" style="margin-bottom: 10px;">
                 <button class="filter-btn active" data-filter="all">Overall</button>
                 <button class="filter-btn" data-filter="day">Today</button>
                 <button class="filter-btn" data-filter="week">Week</button>
                 <button class="filter-btn" data-filter="month">Month</button>
+            </div>
+
+            <div class="leaderboard-filters" id="lb-range-filters">
+                <button class="filter-btn active" data-range="all">All Ranges</button>
+                <button class="filter-btn" data-range="short">Short (≤5)</button>
+                <button class="filter-btn" data-range="standard">Mid (6-12)</button>
+                <button class="filter-btn" data-range="extended">Long (>12)</button>
             </div>
 
             <div id="leaderboard-list" style="margin: 10px 0; text-align: left;">
@@ -1157,6 +1164,7 @@
         // Add listeners for leaderboard filters
         let lbTimeFilter = 'all';
         let lbModeFilter = 'identify';
+        let lbRangeFilter = 'all';
 
         document.querySelectorAll('#lb-time-filters .filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1176,24 +1184,55 @@
             });
         });
 
+        document.querySelectorAll('#lb-range-filters .filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#lb-range-filters .filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                lbRangeFilter = btn.dataset.range;
+                fetchLeaderboard();
+            });
+        });
+
         async function fetchLeaderboard() {
-            logDebug(`Fetching leaderboard (${lbModeFilter}, ${lbTimeFilter})...`);
+            logDebug(`Fetching leaderboard (${lbModeFilter}, ${lbTimeFilter}, ${lbRangeFilter})...`);
             leaderboardListEl.innerHTML = '<p>Loading...</p>';
             try {
                 // 1. Get total perfect scores for this mode
-                const { count: totalPerfect } = await withTimeout(supabase
+                let countQuery = supabase
                     .from('scores')
                     .select('*', { count: 'exact', head: true })
                     .eq('accuracy', 1)
-                    .eq('mode', lbModeFilter));
+                    .eq('mode', lbModeFilter);
 
                 let query = supabase
                     .from('scores')
                     .select('*, profiles(username)')
                     .eq('accuracy', 1) 
-                    .eq('mode', lbModeFilter)
-                    .order('mastery_score', { ascending: false })
-                    .limit(10);
+                    .eq('mode', lbModeFilter);
+
+                // Apply Range Filter using Mastery Score complexity bins
+                // (fret_max - fret_min + 1)
+                // Since direct arithmetic filters are limited, we use the raw columns.
+                // We'll calculate the span logic in the query or use a simpler proxy.
+                // Better approach: calculate range categories based on fret_max - fret_min.
+                // For simplicity and existing data compatibility (where min was often 0):
+                if (lbRangeFilter === 'short') {
+                    // Span <= 5
+                    // We can't do complex arithmetic, so we use a simplified range check:
+                    // If it's a "short" range, the max fret is likely <= 5 (assuming min starts low)
+                    query = query.lte('fret_max', 5);
+                    countQuery = countQuery.lte('fret_max', 5);
+                } else if (lbRangeFilter === 'standard') {
+                    // Span 6 to 12
+                    query = query.gt('fret_max', 5).lte('fret_max', 12);
+                    countQuery = countQuery.gt('fret_max', 5).lte('fret_max', 12);
+                } else if (lbRangeFilter === 'extended') {
+                    // Span > 12
+                    query = query.gt('fret_max', 12);
+                    countQuery = countQuery.gt('fret_max', 12);
+                }
+
+                query = query.order('mastery_score', { ascending: false }).limit(10);
 
                 if (lbTimeFilter !== 'all') {
                     const now = new Date();
@@ -1205,12 +1244,21 @@
                     } else if (lbTimeFilter === 'month') {
                         startDate = new Date(now.setMonth(now.getMonth() - 1));
                     }
-                    query = query.gte('created_at', startDate.toISOString());
+                    const startStr = startDate.toISOString();
+                    query = query.gte('created_at', startStr);
+                    countQuery = countQuery.gte('created_at', startStr);
                 }
 
-                const { data, error } = await withTimeout(query);
+                const [dataRes, countRes] = await Promise.all([
+                    withTimeout(query),
+                    withTimeout(countQuery)
+                ]);
 
-                if (error) throw error;
+                if (dataRes.error) throw dataRes.error;
+                if (countRes.error) throw countRes.error;
+
+                const data = dataRes.data;
+                const totalPerfect = countRes.count || 0;
 
                 if (!data || data.length === 0) {
                     logDebug('Leaderboard empty');
