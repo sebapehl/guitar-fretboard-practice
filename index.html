@@ -1553,14 +1553,18 @@
 
             // Initial overlay display
             battleResultTitle.innerText = "BATTLE COMPLETE!";
-            earnedRankDisplay.innerText = "CALCULATING RANK...";
-            earnedRankDisplay.style.color = "var(--text-muted)";
             finalStatsText.innerText = `Mastery Score: ${masteryScore.toFixed(3)} (${totalTime.toFixed(2)}s)`;
             gameOverScreen.style.display = 'flex';
 
-            // Always fetch rank for perfect games, even for anonymous users
+            // Only fetch rank for perfect games
             if (state.score === state.rounds) {
+                earnedRankDisplay.innerText = "CALCULATING RANK...";
+                earnedRankDisplay.style.color = "var(--text-muted)";
                 fetchRanks(masteryScore);
+            } else {
+                earnedRankDisplay.innerText = "NO RANK";
+                earnedRankDisplay.style.color = "var(--text-muted)";
+                rankDisplayEl.innerHTML = `<p style="font-size: 0.8rem; opacity: 0.7;">Get a 10/10 perfect score to earn a community rank!</p>`;
             }
 
             saveScore(totalTime);
