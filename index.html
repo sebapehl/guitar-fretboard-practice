@@ -1653,6 +1653,38 @@
             }
         });
 
+        // Username Edit
+        document.getElementById('edit-username-btn').addEventListener('click', () => {
+            const container = document.getElementById('username-edit-container');
+            const input = document.getElementById('username-input');
+            const display = document.getElementById('user-username-display');
+            
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+            if (container.style.display === 'block') {
+                input.value = display.innerText;
+                input.focus();
+            }
+        });
+
+        document.getElementById('save-username-btn').addEventListener('click', async () => {
+            const newUsername = document.getElementById('username-input').value;
+            if (!newUsername) return;
+
+            try {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({ username: newUsername })
+                    .eq('id', currentUser.id);
+                
+                if (error) throw error;
+
+                document.getElementById('user-username-display').innerText = newUsername;
+                document.getElementById('username-edit-container').style.display = 'none';
+            } catch (err) {
+                alert('Failed to update username: ' + err.message);
+            }
+        });
+
         logoutBtn.addEventListener('click', async () => {
             await supabase.auth.signOut();
             showView('landing');
