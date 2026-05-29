@@ -1,0 +1,22 @@
+{
+  "name": "FretboardBattle",
+  "short_name": "Fretboard",
+  "description": "Gamified guitar fretboard practice app.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FFF9F3",
+  "theme_color": "#FF5A5F",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://img.icons8.com/fluency/192/guitar.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://img.icons8.com/fluency/512/guitar.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

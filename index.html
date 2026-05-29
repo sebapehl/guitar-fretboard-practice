@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>FretboardBattle</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#FF5A5F">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -567,6 +570,7 @@
             <span></span>
         </div>
         <h2 id="header-title" style="cursor: pointer; flex: 1;">FretboardBattle</h2>
+        <div id="header-level-badge" style="display: none; background: var(--primary); color: white; padding: 4px 10px; border-radius: 50px; font-size: 0.75rem; font-weight: 800; margin-right: 10px;">LVL 1</div>
         <button id="sound-toggle-btn" class="btn btn-secondary" style="margin-right: 15px; padding: 8px 16px; border-radius: 50px; font-size: 0.8rem; background: #f1f3f5; color: var(--text);">
             🔈 Sound: Off
         </button>
@@ -753,8 +757,27 @@
 
         <div id="profile-view" style="display: none;">
             <h2>BATTLE RECORD</h2>
-            <div class="setting-group">
-                <p>Combatant: <strong id="user-email-display"></strong></p>
+            <div style="background: var(--primary); color: white; padding: 24px; border-radius: 20px; text-align: left; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <div style="font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.1em;">Level</div>
+                        <div style="font-size: 2.5rem; font-weight: 800; line-height: 1;" id="user-level-display">1</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.1em;">Combatant</div>
+                        <div style="font-weight: 700;" id="user-email-display"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 6px;">
+                        <span>XP Progress</span>
+                        <span id="user-xp-display">0 / 100</span>
+                    </div>
+                    <div style="height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden;">
+                        <div id="user-xp-bar" style="height: 100%; background: white; width: 0%; transition: width 0.5s ease-out;"></div>
+                    </div>
+                </div>
             </div>
             
             <div id="user-stats" style="margin-top: 20px; text-align: left;">
@@ -1003,10 +1026,14 @@
 
         function updateAuthUI() {
             const authMenu = document.getElementById('menu-auth');
+            const levelBadge = document.getElementById('header-level-badge');
             if (currentUser) {
                 authMenu.innerText = `Account (${currentUser.email.split('@')[0]})`;
+                levelBadge.style.display = 'block';
+                fetchProfileData();
             } else {
                 authMenu.innerText = 'Login / Sign Up';
+                levelBadge.style.display = 'none';
             }
         }
 
@@ -1305,14 +1332,64 @@
         document.getElementById('menu-auth').addEventListener('click', () => {
             stopGame();
             if (currentUser) {
-                userEmailDisplay.innerText = currentUser.email;
+                userEmailDisplay.innerText = currentUser.email.split('@')[0];
                 showView('profile');
+                fetchProfileData();
                 fetchMyScores();
             } else {
                 showView('auth');
             }
             sideNav.classList.remove('open');
         });
+
+        let lastKnownLevel = null;
+        async function fetchProfileData() {
+            if (!currentUser) return;
+            try {
+                const { data, error } = await withTimeout(supabase
+                    .from('profiles')
+                    .select('total_xp')
+                    .eq('id', currentUser.id)
+                    .single());
+                
+                if (error) throw error;
+                
+                const xp = data.total_xp || 0;
+                const level = Math.floor(Math.sqrt(xp / 50)) + 1;
+                
+                // Level Up celebration!
+                if (lastKnownLevel !== null && level > lastKnownLevel) {
+                    confetti({
+                        particleCount: 200,
+                        spread: 100,
+                        origin: { y: 0.6 },
+                        colors: ['#FF5A5F', '#ffc107']
+                    });
+                    // Could add a toast here too
+                    logDebug(`LEVEL UP! ${lastKnownLevel} -> ${level}`);
+                }
+                lastKnownLevel = level;
+
+                const nextLevelXP = 50 * Math.pow(level, 2);
+                const currentLevelXP = 50 * Math.pow(level - 1, 2);
+                
+                const progress = ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+                
+                const levelDisplay = document.getElementById('user-level-display');
+                if (levelDisplay) levelDisplay.innerText = level;
+                
+                const xpDisplay = document.getElementById('user-xp-display');
+                if (xpDisplay) xpDisplay.innerText = `${xp} / ${nextLevelXP}`;
+                
+                const xpBar = document.getElementById('user-xp-bar');
+                if (xpBar) xpBar.style.width = `${progress}%`;
+
+                const headerBadge = document.getElementById('header-level-badge');
+                if (headerBadge) headerBadge.innerText = `LVL ${level}`;
+            } catch (err) {
+                logDebug(`Profile fetch failed: ${err.message}`);
+            }
+        }
 
         async function fetchMyScores() {
             logDebug('Fetching my scores...');
@@ -1473,6 +1550,15 @@
             const result = state.submitAnswer(answer);
             ui.showFeedback(feedbackStringIdx, feedbackFret, result.correct);
 
+            // Haptic feedback
+            if ('vibrate' in navigator) {
+                if (result.correct) {
+                    navigator.vibrate(10);
+                } else {
+                    navigator.vibrate([20, 30, 20]);
+                }
+            }
+
             // Trigger animations without forced reflow
             feedbackEl.classList.remove('success-animate', 'error-animate');
             requestAnimationFrame(() => {
@@ -1597,6 +1683,8 @@
             logDebug('Game finished, calling endGame');
             clearInterval(timerInterval);
             const totalTime = state.getTotalTime();
+            const roundXP = state.getRoundXP();
+            
             timerEl.innerText = `${totalTime.toFixed(2)}s`;
             challengeEl.innerText = "Battle Complete!";
             feedbackEl.innerText = `Final: ${state.score}/${state.rounds} in ${totalTime.toFixed(2)}s`;
@@ -1613,8 +1701,22 @@
 
             // Initial overlay display
             battleResultTitle.innerText = "BATTLE COMPLETE!";
-            finalStatsText.innerText = `Mastery Score: ${masteryScore.toFixed(3)} (${totalTime.toFixed(2)}s)`;
+            finalStatsText.innerHTML = `
+                <div style="font-size: 1.1rem; margin-bottom: 8px;">Score: ${state.score}/${state.rounds} in ${totalTime.toFixed(2)}s</div>
+                <div style="color: var(--accent-green); font-weight: 800; font-size: 1.4rem;">+${roundXP} XP Earned</div>
+                <div style="font-size: 0.9rem; opacity: 0.7; margin-top: 8px;">Mastery Score: ${masteryScore.toFixed(3)}</div>
+            `;
             gameOverScreen.style.display = 'flex';
+
+            // Confetti for perfect score
+            if (state.score === state.rounds) {
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#FF5A5F', '#00A699', '#ffc107']
+                });
+            }
 
             // Only fetch rank for perfect games
             if (state.score === state.rounds) {
@@ -1627,7 +1729,7 @@
                 rankDisplayEl.innerHTML = `<p style="font-size: 0.8rem; opacity: 0.7;">Get a 10/10 perfect score to earn a community rank!</p>`;
             }
 
-            saveScore(totalTime);
+            saveScore(totalTime, roundXP);
             updatePBDisplay();
             ui.render();
         }
@@ -1639,8 +1741,8 @@
         });
 
         // Leaderboard
-        async function saveScore(time) {
-            logDebug(`saveScore called (score: ${state.score}/${state.rounds})`);
+        async function saveScore(time, roundXP) {
+            logDebug(`saveScore called (score: ${state.score}/${state.rounds}, XP: ${roundXP})`);
             // Local storage PB (only for perfect scores)
             if (state.score === state.rounds) {
                 const key = `pb_${state.mode}_${state.fretRange[0]}_${state.fretRange[1]}`;
@@ -1676,8 +1778,25 @@
                         history: state.history
                     };
 
-                    const { error } = await withTimeout(supabase.from('scores').insert(scoreData));
-                    if (error) throw error;
+                    // Insert score and update XP in parallel
+                    const [scoreRes, profileRes] = await Promise.all([
+                        withTimeout(supabase.from('scores').insert(scoreData)),
+                        // Use RPC or direct increment if possible. 
+                        // For simplicity here, we'll do a read-modify-write or assume a function exists.
+                        // Ideally: supabase.rpc('increment_xp', { amount: roundXP })
+                        // Since we don't have the RPC yet, let's just try to update.
+                        withTimeout(supabase.rpc('add_xp', { xp_to_add: roundXP }))
+                    ]);
+
+                    if (scoreRes.error) throw scoreRes.error;
+                    // Note: RPC might fail if not created, we'll log it but not block
+                    if (profileRes.error) {
+                        logDebug(`XP update failed: ${profileRes.error.message}`);
+                    } else {
+                        // Refresh profile data to update badge/XP
+                        fetchProfileData();
+                    }
+                    
                     dbStatusEl.innerText = '';
                     logDebug('Cloud save SUCCESS');
                 } catch (err) {
@@ -1806,6 +1925,14 @@
         });
 
         startBtn.addEventListener('click', startCountdown);
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => logDebug('SW registered'))
+                    .catch(err => logDebug('SW failed', err));
+            });
+        }
 
         init();
     </script>

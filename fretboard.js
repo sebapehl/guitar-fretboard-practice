@@ -77,6 +77,9 @@ export class GameState {
         this.roundStartTime = null;
         this.status = 'idle'; // 'idle', 'playing', 'finished'
         this.currentChallenge = null;
+        
+        // XP System
+        this.xpEarned = 0;
     }
 
     startRound() {
@@ -84,6 +87,7 @@ export class GameState {
         this.score = 0;
         this.currentRound = 0;
         this.history = [];
+        this.xpEarned = 0;
         this.startTime = performance.now();
         this.nextChallenge();
     }
@@ -150,7 +154,14 @@ export class GameState {
             }
         }
 
-        if (correct) this.score++;
+        if (correct) {
+            this.score++;
+            // Calculate XP for this hit
+            const span = this.fretRange[1] - this.fretRange[0] + 1;
+            const complexityBonus = Math.floor(span / 4);
+            const speedBonus = Math.max(0, Math.floor((3000 - latency) / 200));
+            this.xpEarned += (10 + complexityBonus + speedBonus);
+        }
         
         this.history.push({
             challenge: { ...this.currentChallenge },
@@ -160,6 +171,15 @@ export class GameState {
         });
 
         return { correct, latency };
+    }
+
+    getRoundXP() {
+        let total = this.xpEarned;
+        // Perfect round bonus
+        if (this.score === this.rounds) {
+            total += 50;
+        }
+        return total;
     }
 
     getTotalTime() {

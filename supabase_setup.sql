@@ -5,9 +5,21 @@ CREATE TABLE profiles (
     avatar_url TEXT,
     trophies INTEGER DEFAULT 0,
     streak_days INTEGER DEFAULT 0,
+    total_xp INTEGER DEFAULT 0,
     last_practice TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+-- Function to safely increment XP
+CREATE OR REPLACE FUNCTION add_xp(xp_to_add INTEGER)
+RETURNS void AS $$
+BEGIN
+  UPDATE profiles
+  SET total_xp = total_xp + xp_to_add,
+      last_practice = NOW()
+  WHERE id = auth.uid();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 2. Create Scores Table
 CREATE TABLE scores (
