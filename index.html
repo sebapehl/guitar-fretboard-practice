@@ -1485,13 +1485,15 @@
             try {
                 const { data, error } = await withTimeout(supabase
                     .from('profiles')
-                    .select('total_xp')
+                    .select('total_xp, username')
                     .eq('id', currentUser.id)
                     .single());
                 
                 if (error) throw error;
                 
                 const xp = data.total_xp || 0;
+                const username = data.username || 'User';
+                
                 const level = Math.floor(Math.sqrt(xp / 50)) + 1;
                 
                 // Level Up celebration!
@@ -1502,7 +1504,6 @@
                         origin: { y: 0.6 },
                         colors: ['#FF5A5F', '#ffc107']
                     });
-                    // Could add a toast here too
                     logDebug(`LEVEL UP! ${lastKnownLevel} -> ${level}`);
                 }
                 lastKnownLevel = level;
@@ -1514,6 +1515,9 @@
                 
                 const levelDisplay = document.getElementById('user-level-display');
                 if (levelDisplay) levelDisplay.innerText = level;
+                
+                const usernameDisplay = document.getElementById('user-username-display');
+                if (usernameDisplay) usernameDisplay.innerText = username;
                 
                 const xpDisplay = document.getElementById('user-xp-display');
                 if (xpDisplay) xpDisplay.innerText = `${xp} / ${nextLevelXP}`;
