@@ -571,7 +571,7 @@
         </div>
         <h2 id="header-title" style="cursor: pointer; flex: 1;">FretboardBattle</h2>
         <button id="sound-toggle-btn" class="btn btn-secondary" style="margin-right: 12px; padding: 10px 14px; border-radius: 50px; font-size: 11px; background: transparent; border: none; color: var(--text); box-shadow: none;">
-            🔈 Off
+            🔈 Sound Off
         </button>
         <div id="header-home-btn" style="cursor: pointer; padding: 10px; border: 1px solid #ddd; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; background: white;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FF5A5F" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -848,7 +848,7 @@
                 }
                 this.enabled = !this.enabled;
                 const btn = document.getElementById('sound-toggle-btn');
-                btn.innerText = this.enabled ? '🔊 On' : '🔈 Off';
+                btn.innerText = this.enabled ? '🔊 Sound On' : '🔈 Sound Off';
                 btn.style.background = this.enabled ? 'var(--primary-soft)' : 'transparent';
                 btn.style.border = this.enabled ? '1px solid var(--primary)' : 'none';
                 btn.style.color = this.enabled ? 'var(--primary)' : 'var(--text)';
