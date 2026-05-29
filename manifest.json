@@ -1,6 +1,6 @@
 {
   "name": "FretboardBattle",
-  "short_name": "Fretboard",
+  "short_name": "FretboardBattle",
   "description": "Gamified guitar fretboard practice app.",
   "start_url": "./index.html",
   "display": "standalone",
