@@ -5,6 +5,8 @@ const ASSETS = [
   './fretboard.js',
   './ui.js',
   './supabase.js',
+  './manifest.json',
+  './icon.svg',
   'https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js',
   'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js'
 ];
