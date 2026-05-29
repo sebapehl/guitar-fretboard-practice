@@ -897,8 +897,9 @@
                 <button class="btn btn-secondary" id="share-profile-btn" style="flex: 1; padding: 12px;">📤 Share Rank</button>
             </div>
 
-            <div class="controls" style="margin-top: 30px;">
+            <div class="controls" style="margin-top: 30px; display: flex; flex-direction: column; gap: 12px;">
                 <button class="btn btn-secondary" id="logout-btn">Logout</button>
+                <button class="btn" id="delete-account-btn" style="background: #ff5a5f; color: white; border: none; font-size: 0.8rem; padding: 10px;">Delete Account</button>
             </div>
         </div>
     </div>
@@ -1650,6 +1651,13 @@
         logoutBtn.addEventListener('click', async () => {
             await supabase.auth.signOut();
             showView('landing');
+        });
+
+        document.getElementById('delete-account-btn').addEventListener('click', () => {
+            if (confirm("Are you sure you want to delete your account? This action is IRREVERSIBLE and will remove all your practice data.")) {
+                logDebug('User requested account deletion');
+                alert('For security, account deletion must be processed via a server-side function. Please contact the developer to initiate account removal.');
+            }
         });
 
         function setAppMode(mode) {
