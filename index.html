@@ -1687,7 +1687,7 @@
 
         document.getElementById('share-profile-btn').addEventListener('click', async () => {
             const level = document.getElementById('user-level-display').innerText;
-            const username = document.getElementById('user-username-display').innerText;
+            const username = document.getElementById('user-username-display').innerText || 'User';
             
             const shareData = {
                 title: 'FretboardBattle',
