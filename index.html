@@ -1685,6 +1685,28 @@
             }
         });
 
+        document.getElementById('share-profile-btn').addEventListener('click', async () => {
+            const level = document.getElementById('user-level-display').innerText;
+            const username = document.getElementById('user-username-display').innerText;
+            
+            const shareData = {
+                title: 'FretboardBattle',
+                text: `🎸 I just hit Level ${level} as ${username} on FretboardBattle! Can you climb the ranks?`,
+                url: window.location.origin
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+                    alert('Rank shared! Link copied to clipboard.');
+                }
+            } catch (err) {
+                logDebug('Share failed', err);
+            }
+        });
+
         logoutBtn.addEventListener('click', async () => {
             await supabase.auth.signOut();
             showView('landing');
