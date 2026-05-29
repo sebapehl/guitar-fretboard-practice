@@ -1548,7 +1548,10 @@
                 if (authMode === 'login') {
                     const { error } = await supabase.auth.signInWithPassword({ email, password });
                     if (error) throw error;
-                    showView('game');
+                    userEmailDisplay.innerText = email.split('@')[0];
+                    showView('profile');
+                    fetchProfileData();
+                    fetchMyScores();
                 } else {
                     const { data, error } = await supabase.auth.signUp({ email, password });
                     if (error) throw error;
