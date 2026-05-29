@@ -1140,22 +1140,30 @@
             if (!currentUser || profileSynced) return;
             logDebug('Syncing profile...');
             try {
-                const { error } = await withTimeout(supabase.from('profiles').upsert({
-                    id: currentUser.id,
-                    username: currentUser.email.split('@')[0],
-                }, { onConflict: 'id' }));
-                
-                if (error) {
-                    logDebug(`Profile sync error: ${error.message}`);
+                // First, check if profile already has a username
+                const { data: existingProfile, error: fetchError } = await withTimeout(supabase
+                    .from('profiles')
+                    .select('username')
+                    .eq('id', currentUser.id)
+                    .single());
+
+                // If no profile exists or no username set, upsert default
+                if (fetchError || !existingProfile?.username) {
+                    const { error } = await withTimeout(supabase.from('profiles').upsert({
+                        id: currentUser.id,
+                        username: currentUser.email.split('@')[0],
+                    }, { onConflict: 'id' }));
+                    if (error) throw error;
+                    logDebug('Profile synced with default username');
                 } else {
-                    profileSynced = true;
-                    logDebug('Profile synced');
+                    logDebug('Profile already has username');
                 }
+
+                profileSynced = true;
             } catch (err) {
                 logDebug(`Profile sync failed: ${err.message}`);
             }
         }
-
         function updateAuthUI() {
             const authMenu = document.getElementById('menu-auth');
             if (currentUser) {
@@ -1675,6 +1683,7 @@
             if (!newUsername) return;
 
             try {
+                // Update specifically the username
                 const { error } = await supabase
                     .from('profiles')
                     .update({ username: newUsername })
@@ -1684,7 +1693,9 @@
 
                 document.getElementById('user-username-display').innerText = newUsername;
                 document.getElementById('username-edit-container').style.display = 'none';
+                logDebug(`Username updated to: ${newUsername}`);
             } catch (err) {
+                console.error('Failed to update username:', err);
                 alert('Failed to update username: ' + err.message);
             }
         });
