@@ -583,6 +583,7 @@
             <li id="menu-auth">Account</li>
             <li id="menu-theory">Fretboard Theory</li>
             <li id="menu-about">About</li>
+            <li id="menu-install" style="display: none; border-top: 1px solid #eee; color: var(--primary); font-weight: 800;">✨ Install App</li>
         </ul>
     </nav>
 
@@ -2013,6 +2014,38 @@
         });
 
         startBtn.addEventListener('click', startCountdown);
+
+        let deferredPrompt;
+        const installBtn = document.getElementById('menu-install');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI notify the user they can add to home screen
+            installBtn.style.display = 'block';
+            logDebug('Install prompt ready');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            // Show the prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            logDebug(`User response to install prompt: ${outcome}`);
+            // We've used the prompt, and can't use it again, throw it away
+            deferredPrompt = null;
+            // Hide the install button
+            installBtn.style.display = 'none';
+            sideNav.classList.remove('open');
+        });
+
+        window.addEventListener('appinstalled', (evt) => {
+            logDebug('App was installed');
+            installBtn.style.display = 'none';
+        });
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
