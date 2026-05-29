@@ -1653,10 +1653,18 @@
             showView('landing');
         });
 
-        document.getElementById('delete-account-btn').addEventListener('click', () => {
+        document.getElementById('delete-account-btn').addEventListener('click', async () => {
             if (confirm("Are you sure you want to delete your account? This action is IRREVERSIBLE and will remove all your practice data.")) {
-                logDebug('User requested account deletion');
-                alert('For security, account deletion must be processed via a server-side function. Please contact the developer to initiate account removal.');
+                try {
+                    const { error } = await supabase.functions.invoke('delete-user');
+                    if (error) throw error;
+                    
+                    alert('Account deleted successfully.');
+                    await supabase.auth.signOut();
+                    showView('landing');
+                } catch (err) {
+                    alert('Failed to delete account: ' + err.message);
+                }
             }
         });
 
