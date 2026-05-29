@@ -606,9 +606,42 @@
         </div>
 
         <div id="about-view" style="display: none; text-align: left;">
-            <h2>THE WARRIOR'S CODE</h2>
-            <p>No shortcuts. No excuses. Just you, the wood, and the clock. FretboardBattle is a competitive arena designed for those who want to prove they truly own the neck.</p>
-            <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-muted);">Built with Vanilla JS and Supabase.</p>
+            <h2 style="color: var(--primary); font-weight: 800;">THE WARRIOR'S CODE</h2>
+            <p style="margin-bottom: 24px;">No shortcuts. No excuses. Just you, the wood, and the clock. <strong>FretboardBattle</strong> is a competitive training arena designed for guitarists who want to stop guessing and start knowing the neck.</p>
+
+            <h3 style="font-size: 1.1rem; margin-top: 2rem;">Mastery Elements</h3>
+            <ul style="list-style: none; padding: 0; display: grid; gap: 16px;">
+                <li style="background: #f8f9fa; padding: 16px; border-radius: 16px; border: 1px solid #ebebeb;">
+                    <strong style="color: var(--primary);">⚔️ Speed Drills:</strong> Identify notes from random fret positions under pressure.
+                </li>
+                <li style="background: #f8f9fa; padding: 16px; border-radius: 16px; border: 1px solid #ebebeb;">
+                    <strong style="color: var(--primary);">🎯 Target Search:</strong> Locate given notes across specific strings and neighborhoods.
+                </li>
+                <li style="background: #f8f9fa; padding: 16px; border-radius: 16px; border: 1px solid #ebebeb;">
+                    <strong style="color: var(--primary);">🐙 Theory Hacks:</strong> Interactive visual landcards like "The Octopus" to unlock octave and scale patterns.
+                </li>
+                <li style="background: #f8f9fa; padding: 16px; border-radius: 16px; border: 1px solid #ebebeb;">
+                    <strong style="color: var(--primary);">🏆 Hall of Fame:</strong> Compete for the top Mastery Score on global and daily leaderboards.
+                </li>
+            </ul>
+
+            <h3 style="font-size: 1.1rem; margin-top: 2rem;">The XP & Leveling System</h3>
+            <p>Every session earns you XP, propelling you from a <em>Novice</em> to a <em>Grandmaster</em>. Here is how your progress is calculated:</p>
+            <div style="background: var(--primary-soft); padding: 20px; border-radius: 20px; margin-top: 12px; border: 1px solid rgba(255, 90, 95, 0.1);">
+                <ul style="margin: 0; padding-left: 20px; color: var(--text);">
+                    <li style="margin-bottom: 8px;"><strong>Base Hit:</strong> +10 XP for every correct note.</li>
+                    <li style="margin-bottom: 8px;"><strong>Speed Bonus:</strong> Up to +15 XP for fast identifies (sub-3 second reactions).</li>
+                    <li style="margin-bottom: 8px;"><strong>Complexity Bonus:</strong> Earn more XP by practicing larger fret ranges.</li>
+                    <li style="margin-bottom: 0;"><strong>Perfect Round:</strong> A massive <strong>+50 XP bonus</strong> for a flawless 10/10 performance.</li>
+                </ul>
+            </div>
+
+            <h3 style="font-size: 1.1rem; margin-top: 2rem;">Current State</h3>
+            <p>FretboardBattle is currently a high-performance **PWA (Progressive Web App)**. You can install it on your home screen for offline-ready practice. It features tactile haptic feedback, cloud-synced profile tracking via Supabase, and real-time community rankings.</p>
+            
+            <p style="margin-top: 2rem; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid #eee; padding-top: 20px;">
+                Built with Vanilla JS, Tone.js, and Supabase. Crafted for speed and musicality.
+            </p>
         </div>
 
         <div id="theory-view" style="display: none;">
