@@ -750,8 +750,21 @@
                 <input type="password" id="auth-password" placeholder="Password" required>
                 <button type="submit" class="btn" id="auth-submit-btn">Login</button>
             </form>
-            <div class="auth-toggle" id="auth-toggle-mode">Don't have an account? Sign up</div>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+                <div class="auth-toggle" id="auth-toggle-mode" style="margin-top: 0;">Don't have an account? Sign up</div>
+                <div class="auth-toggle" id="auth-forgot-password" style="margin-top: 0; font-size: 0.85rem; opacity: 0.8;">Forgot password?</div>
+            </div>
             <div id="auth-error" style="color: red; margin-top: 10px;"></div>
+        </div>
+
+        <div id="reset-view" style="display: none;">
+            <h2>Reset Password</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">Enter your new password below to regain access to your armory.</p>
+            <form class="auth-form" id="reset-form">
+                <input type="password" id="reset-password" placeholder="New Password" required minlength="6">
+                <button type="submit" class="btn">Update Password</button>
+            </form>
+            <div id="reset-error" style="color: red; margin-top: 10px;"></div>
         </div>
 
         <div id="profile-view" style="display: none;">
@@ -925,6 +938,7 @@
         const aboutView = document.getElementById('about-view');
         const leaderboardView = document.getElementById('leaderboard-view');
         const theoryView = document.getElementById('theory-view');
+        const resetView = document.getElementById('reset-view');
 
         const challengeEl = document.getElementById('challenge-text');
         const noteInputEl = document.getElementById('note-input');
@@ -990,9 +1004,19 @@
             updatePBDisplay();
             showView('landing');
 
+            // Check if we are in a recovery flow (URL contains type=recovery)
+            if (window.location.hash.includes('type=recovery')) {
+                logDebug('Recovery link detected');
+                showView('reset');
+            }
+
             // Listen for auth changes
             supabase.auth.onAuthStateChange((event, session) => {
                 logDebug(`Auth event: ${event}`);
+                if (event === 'PASSWORD_RECOVERY') {
+                    showView('reset');
+                }
+                
                 currentUser = session?.user || null;
                 if (currentUser && !profileSynced) {
                     logDebug(`Logged in as: ${currentUser.email}`);
@@ -1052,6 +1076,7 @@
             leaderboardView.style.display = viewName === 'leaderboard' ? 'block' : 'none';
             aboutView.style.display = viewName === 'about' ? 'block' : 'none';
             theoryView.style.display = viewName === 'theory' ? 'block' : 'none';
+            resetView.style.display = viewName === 'reset' ? 'block' : 'none';
         }
 
         // Navigation & Menu
@@ -1440,6 +1465,42 @@
             authSubmitBtn.innerText = authMode === 'login' ? 'Login' : 'Sign Up';
             authToggleMode.innerText = authMode === 'login' ? "Don't have an account? Sign up" : "Already have an account? Login";
             authErrorEl.innerText = '';
+            document.getElementById('auth-forgot-password').style.display = authMode === 'login' ? 'block' : 'none';
+        });
+
+        document.getElementById('auth-forgot-password').addEventListener('click', async () => {
+            const email = authEmailInput.value;
+            if (!email) {
+                authErrorEl.innerText = 'Enter your email first to receive a reset link.';
+                return;
+            }
+            authErrorEl.style.color = 'var(--text)';
+            authErrorEl.innerText = 'Sending reset link...';
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + window.location.pathname,
+            });
+            if (error) {
+                authErrorEl.style.color = 'red';
+                authErrorEl.innerText = error.message;
+            } else {
+                authErrorEl.style.color = 'var(--accent-green)';
+                authErrorEl.innerText = 'Reset link sent! Check your email.';
+            }
+        });
+
+        document.getElementById('reset-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('reset-password').value;
+            const errorEl = document.getElementById('reset-error');
+            errorEl.innerText = '';
+            
+            const { error } = await supabase.auth.updateUser({ password });
+            if (error) {
+                errorEl.innerText = error.message;
+            } else {
+                alert('Password updated successfully! You can now login.');
+                showView('auth');
+            }
         });
 
         authForm.addEventListener('submit', async (e) => {
