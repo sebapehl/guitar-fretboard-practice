@@ -182,6 +182,19 @@ export class GameState {
         return total;
     }
 
+    getMasteryScore() {
+        const totalTime = this.getTotalTime();
+        if (totalTime === 0) return 0;
+        
+        const span = this.fretRange[1] - this.fretRange[0] + 1;
+        const complexity = Math.pow(span, 1.5);
+        const accuracy = this.score / this.rounds;
+        
+        // Base formula: (complexity * 10000) / (time_ms) * accuracy
+        const score = (complexity * 10000) / (totalTime * 1000) * accuracy;
+        return score;
+    }
+
     getTotalTime() {
         if (this.status === 'finished') {
             return (this.endTime - this.startTime) / 1000;

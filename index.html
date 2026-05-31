@@ -1768,10 +1768,7 @@
             const score = `${state.score}/${state.rounds}`;
             const mode = state.mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret';
             
-            // Calculate Mastery Score for the share text
-            const span = state.fretRange[1] - state.fretRange[0] + 1;
-            const complexity = Math.pow(span, 1.5);
-            const masteryScore = (complexity * 10000) / (parseFloat(totalTime) * 1000);
+            const masteryScore = state.getMasteryScore();
 
             const shareData = {
                 title: 'FretboardBattle Result',
@@ -2023,9 +2020,7 @@
             noteInputEl.style.display = 'none';
             
             // Calculate Mastery Score
-            const span = state.fretRange[1] - state.fretRange[0] + 1;
-            const complexity = Math.pow(span, 1.5);
-            const masteryScore = (complexity * 10000) / (totalTime * 1000);
+            const masteryScore = state.getMasteryScore();
 
             // Initial overlay display
             battleResultTitle.innerText = "BATTLE COMPLETE!";
@@ -2091,9 +2086,7 @@
             if (currentUser) {
                 logDebug('Attempting cloud save...');
                 try {
-                    const span = state.fretRange[1] - state.fretRange[0] + 1;
-                    const complexity = Math.pow(span, 1.5);
-                    const masteryScore = (complexity * 10000) / (time * 1000);
+                    const masteryScore = state.getMasteryScore();
 
                     const scoreData = {
                         user_id: currentUser.id,
