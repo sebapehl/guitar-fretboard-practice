@@ -1129,7 +1129,15 @@
                 if (currentUser && !profileSynced) {
                     logDebug(`Logged in as: ${currentUser.email}`);
                     ensureProfileExists(); // Run in background
-                } else if (!currentUser) {
+                }
+
+                if (event === 'SIGNED_IN') {
+                    // Fetch data but don't force view redirect here (handled in explicit login/signup)
+                    fetchProfileData();
+                    fetchMyScores();
+                }
+
+                if (!currentUser) {
                     logDebug('Not logged in');
                 }
                 updateAuthUI();
@@ -1656,9 +1664,17 @@
                         });
                     }
 
-                    alert('Check your email for the confirmation link!');
-                    authMode = 'login';
-                    authToggleMode.click(); // Reset to login
+                    if (data?.session) {
+                        // User was automatically logged in (email confirmation off)
+                        userEmailDisplay.innerText = email.split('@')[0];
+                        showView('profile');
+                        fetchProfileData();
+                        fetchMyScores();
+                    } else {
+                        alert('Check your email for the confirmation link!');
+                        authMode = 'login';
+                        authToggleMode.click(); // Reset to login
+                    }
                 }
             } catch (error) {
                 authErrorEl.innerText = error.message;
