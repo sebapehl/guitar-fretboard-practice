@@ -607,7 +607,6 @@
             <li id="menu-auth">Account</li>
             <li id="menu-theory">Fretboard Theory</li>
             <li id="menu-about">About</li>
-            <li id="menu-privacy">Privacy</li>
             <li id="menu-install" style="display: none; border-top: 1px solid #eee; color: var(--primary); font-weight: 800;">Install App as PWA</li>
         </ul>
     </nav>
@@ -693,18 +692,17 @@
             <p style="margin-top: 2rem; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid #eee; padding-top: 20px;">
                 Built with Vanilla JS, Tone.js, and Supabase. Crafted for speed and musicality.
             </p>
-        </div>
 
-        <div id="privacy-view" style="display: none; text-align: left;">
-            <h2 style="color: var(--primary); font-weight: 800;">PRIVACY POLICY</h2>
-            <p>Your privacy is respected here. We only collect the bare minimum to make the arena work.</p>
-            <h3 style="font-size: 1.1rem; margin-top: 1.5rem;">Data Collection</h3>
-            <ul style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
-                <li><strong>Email:</strong> Used exclusively for authentication and account recovery via Supabase. We do not send marketing spam.</li>
-                <li><strong>Game Stats:</strong> We store your scores, XP, and practice history to provide the leaderboard and progression features.</li>
-                <li><strong>Storage:</strong> We use local storage for preferences and Supabase for cloud-syncing.</li>
-            </ul>
-            <p style="margin-top: 2rem; font-size: 0.85rem; color: var(--text-muted);">You can request account deletion at any time by contacting the developer or via the Supabase auth management.</p>
+            <div style="margin-top: 3rem; padding-top: 2rem; border-top: 2px dashed #eee;">
+                <h3 style="font-size: 1.1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em;">Privacy Policy</h3>
+                <p style="font-size: 0.9rem; color: var(--text-muted);">Your privacy is respected here. We only collect the bare minimum to make the arena work:</p>
+                <ul style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; padding-left: 20px;">
+                    <li><strong>Email:</strong> Used exclusively for authentication and account recovery. No spam.</li>
+                    <li><strong>Game Stats:</strong> We store your scores, XP, and history for the leaderboard and progression.</li>
+                    <li><strong>Storage:</strong> Local storage for preferences and Supabase for cloud-syncing.</li>
+                </ul>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;">Account deletion is available in your profile settings at any time.</p>
+            </div>
         </div>
 
         <div id="theory-view" style="display: none;">
@@ -1260,12 +1258,6 @@
             stopGame();
             showView('theory');
             initTheory();
-            sideNav.classList.remove('open');
-        });
-
-        document.getElementById('menu-privacy').addEventListener('click', () => {
-            stopGame();
-            showView('privacy');
             sideNav.classList.remove('open');
         });
 
@@ -2290,4 +2282,14 @@
         init();
     </script>
 </body>
+</html>
+catch(err => logDebug('SW failed', err));
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
+body>
 </html>
