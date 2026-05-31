@@ -1132,9 +1132,16 @@
                 }
 
                 if (event === 'SIGNED_IN') {
-                    // Fetch data but don't force view redirect here (handled in explicit login/signup)
                     fetchProfileData();
                     fetchMyScores();
+                    // Auto-redirect if they just signed in/up from a link and are still on a non-app page
+                    const landingVisible = document.getElementById('landing-view').style.display === 'block';
+                    const authVisible = document.getElementById('auth-view').style.display === 'block';
+                    const resetVisible = document.getElementById('reset-view').style.display === 'block';
+                    
+                    if (landingVisible || authVisible || resetVisible) {
+                        showView('profile');
+                    }
                 }
 
                 if (!currentUser) {
@@ -1501,7 +1508,7 @@
             try {
                 const { data, error } = await withTimeout(supabase
                     .from('profiles')
-                    .select('total_xp, username')
+                    .select('total_xp, username, streak_days')
                     .eq('id', currentUser.id)
                     .single());
                 
@@ -1509,6 +1516,7 @@
                 
                 const xp = data.total_xp || 0;
                 const username = data.username || 'User';
+                const streak = data.streak_days || 0;
                 
                 const level = Math.floor(Math.sqrt(xp / 50)) + 1;
                 
@@ -1534,6 +1542,9 @@
                 
                 const usernameDisplay = document.getElementById('user-username-display');
                 if (usernameDisplay) usernameDisplay.innerText = username;
+
+                const streakDisplay = document.getElementById('user-streak-display');
+                if (streakDisplay) streakDisplay.innerText = streak;
                 
                 const xpDisplay = document.getElementById('user-xp-display');
                 if (xpDisplay) xpDisplay.innerText = `${xp} / ${nextLevelXP}`;
@@ -1719,10 +1730,11 @@
         document.getElementById('share-profile-btn').addEventListener('click', async () => {
             const level = document.getElementById('user-level-display').innerText;
             const username = document.getElementById('user-username-display').innerText || 'User';
+            const streak = document.getElementById('user-streak-display').innerText;
             
             const shareData = {
                 title: 'FretboardBattle',
-                text: `🎸 I just hit Level ${level} as ${username} on FretboardBattle! Can you climb the ranks?`,
+                text: `🎸 I just hit Level ${level} with a 🔥 ${streak}-day streak as ${username} on FretboardBattle! Can you climb the ranks?`,
                 url: window.location.origin
             };
 
@@ -1732,6 +1744,29 @@
                 } else {
                     await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
                     alert('Rank shared! Link copied to clipboard.');
+                }
+            } catch (err) {
+                logDebug('Share failed', err);
+            }
+        });
+
+        document.getElementById('share-score-btn').addEventListener('click', async () => {
+            const totalTime = state.getTotalTime().toFixed(2);
+            const score = `${state.score}/${state.rounds}`;
+            const mode = state.mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret';
+            
+            const shareData = {
+                title: 'FretboardBattle Result',
+                text: `⚔️ Just finished a ${mode} Battle! Scored ${score} in ${totalTime}s on FretboardBattle. Beat my time?`,
+                url: window.location.origin
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    await navigator.clipboard.writeText(`${shareData.text} ${shareData.url}`);
+                    alert('Result shared! Link copied to clipboard.');
                 }
             } catch (err) {
                 logDebug('Share failed', err);
