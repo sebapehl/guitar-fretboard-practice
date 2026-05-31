@@ -1746,7 +1746,9 @@
                     alert('Rank shared! Link copied to clipboard.');
                 }
             } catch (err) {
-                logDebug('Share failed', err);
+                if (err.name !== 'AbortError') {
+                    alert('Sharing failed: ' + err.message);
+                }
             }
         });
 
@@ -1755,9 +1757,14 @@
             const score = `${state.score}/${state.rounds}`;
             const mode = state.mode === 'identify' ? 'Fret ➔ Note' : 'Note ➔ Fret';
             
+            // Calculate Mastery Score for the share text
+            const span = state.fretRange[1] - state.fretRange[0] + 1;
+            const complexity = Math.pow(span, 1.5);
+            const masteryScore = (complexity * 10000) / (parseFloat(totalTime) * 1000);
+
             const shareData = {
                 title: 'FretboardBattle Result',
-                text: `⚔️ Just finished a ${mode} Battle! Scored ${score} in ${totalTime}s on FretboardBattle. Beat my time?`,
+                text: `⚔️ I scored ${score} in ${totalTime}s (Mastery: ${masteryScore.toFixed(0)}) on FretboardBattle! Can you beat my speed?`,
                 url: window.location.origin
             };
 
@@ -1769,7 +1776,9 @@
                     alert('Result shared! Link copied to clipboard.');
                 }
             } catch (err) {
-                logDebug('Share failed', err);
+                if (err.name !== 'AbortError') {
+                    alert('Sharing failed: ' + err.message);
+                }
             }
         });
 
