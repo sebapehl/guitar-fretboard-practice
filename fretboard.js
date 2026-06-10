@@ -21,6 +21,16 @@ export function getMajorScale(rootName) {
     });
 }
 
+export function getChromaticScale(rootName) {
+    const rootValue = NOTE_VALUES[rootName[0].toUpperCase() + rootName.slice(1).toLowerCase()] || NOTE_VALUES[rootName.toUpperCase()];
+    if (rootValue === undefined) return null;
+    const chromatic = [];
+    for (let i = 0; i < 12; i++) {
+        chromatic.push(NOTES[(rootValue + i) % 12]);
+    }
+    return chromatic;
+}
+
 export const STRINGS = [
     { name: "e", open: "E", midi: 64 }, // E4
     { name: "B", open: "B", midi: 59 }, // B3

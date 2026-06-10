@@ -1064,6 +1064,39 @@
 
         function logDebug(msg) {}
 
+        function renderPiano() {
+            const container = document.getElementById('piano-container');
+            if (!container) return;
+            
+            // Standard Octave starting from C
+            const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const blackKeys = [
+                { name: 'C#', after: 0 },
+                { name: 'D#', after: 1 },
+                { name: 'F#', after: 3 },
+                { name: 'G#', after: 4 },
+                { name: 'A#', after: 5 }
+            ];
+
+            const w = 40;
+            const h = 120;
+            let svg = `<svg width="${whiteKeys.length * w}" height="${h}" viewBox="0 0 ${whiteKeys.length * w} ${h}">`;
+
+            // Draw White Keys
+            whiteKeys.forEach((k, i) => {
+                svg += `<rect x="${i * w}" y="0" width="${w-1}" height="${h}" fill="white" stroke="#ccc" />`;
+                svg += `<text x="${i * w + w/2}" y="${h - 10}" font-size="10" text-anchor="middle" fill="#999">${k}</text>`;
+            });
+
+            // Draw Black Keys
+            blackKeys.forEach((k, i) => {
+                svg += `<rect x="${k.after * w + (w*0.7)}" y="0" width="${w*0.6}" height="${h*0.6}" fill="#333" rx="2" />`;
+            });
+
+            svg += `</svg>`;
+            container.innerHTML = `<div style="display: flex; justify-content: center;">${svg}</div>`;
+        }
+
         async function withTimeout(promise, ms = 20000) {
             let timeoutId;
             const timeout = new Promise((_, reject) => 
@@ -2358,6 +2391,45 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             // Prevent Chrome 67 and earlier from automatically showing the prompt
             e.preventDefault();
+            // Stash the event so it can be triggered later.
+            deferredPrompt = e;
+            // Update UI notify the user they can add to home screen
+            installBtn.style.display = 'block';
+            logDebug('Install prompt ready');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            // Show the prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            logDebug(`User response to install prompt: ${outcome}`);
+            // We've used the prompt, and can't use it again, throw it away
+            deferredPrompt = null;
+            // Hide the install button
+            installBtn.style.display = 'none';
+            sideNav.classList.remove('open');
+        });
+
+        window.addEventListener('appinstalled', (evt) => {
+            logDebug('App was installed');
+            installBtn.style.display = 'none';
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => logDebug('SW registered'))
+                    .catch(err => logDebug('SW failed', err));
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
+        e.preventDefault();
             // Stash the event so it can be triggered later.
             deferredPrompt = e;
             // Update UI notify the user they can add to home screen
