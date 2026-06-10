@@ -707,7 +707,11 @@
 
             <div class="hack-card">
                 <h3>🧭 The Foundation: 6 Ladders</h3>
-                <p>Think of your guitar as 6 identical ladders. Every fret is a step (a half-step). After 12 steps, you land on the exact same note, just an octave higher. The "mess" of the fretboard comes from the fact that each ladder starts at a different height (E, A, D, G, B, e).</p>
+                <p>Think of your guitar as 6 identical ladders. Every fret is a step (a half-step). After 12 steps, you land on the exact same note, just an octave higher.</p>
+                <div style="background: var(--primary-soft); padding: 12px; border-radius: 12px; margin-bottom: 15px; font-family: monospace; font-size: 0.9rem; text-align: center; border: 1px solid var(--primary);">
+                    <strong style="color: var(--primary);">The 12 Steps:</strong><br>
+                    C → C# → D → D# → E → F → F# → G → G# → A → A# → B → (C)
+                </div>
                 <div id="theory-fretboard-foundation" class="hack-fretboard"></div>
                 <div style="display: flex; gap: 10px; margin-top: 10px;">
                     <div style="flex: 1; background: #f8f9fa; padding: 10px; border-radius: 12px; font-size: 0.8rem;">
@@ -2382,17 +2386,6 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => logDebug('SW registered'))
-                    .catch(err => logDebug('SW failed', err));
-            });
-        }
-
-        init();
-    </script>
-</body>
-</html>
-addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
                     .then(reg => logDebug('SW registered'))
                     .catch(err => logDebug('SW failed', err));
