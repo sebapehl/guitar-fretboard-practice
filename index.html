@@ -707,42 +707,36 @@
             <h2 style="margin-bottom: 0.5rem;">Fretboard Theory</h2>
             <p style="color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem;">Master the DNA of music before you enter the arena.</p>
 
-            <!-- 1. The C Major Scale -->
+            <!-- 1. The DNA of Music (Piano + Scales) -->
             <div class="hack-card">
-                <h3>1. The C Major Foundation</h3>
-                <p>Most music starts here. The **C Major Scale** is unique because it has no sharps or flats—it's just the "natural" notes.</p>
-                <div style="background: var(--primary-soft); padding: 15px; border-radius: 12px; margin: 15px 0; text-align: center; border: 1px solid var(--primary);">
-                    <div style="font-weight: 800; color: var(--primary); font-size: 1.2rem; letter-spacing: 0.2em;">C D E F G A B (C)</div>
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">7 unique notes, then it repeats</div>
-                </div>
-                <div id="theory-fretboard-major" class="hack-fretboard"></div>
-            </div>
-
-            <!-- 2. The C Chromatic Scale -->
-            <div class="hack-card">
-                <h3>2. The Chromatic Loop (The "Total 12")</h3>
-                <p>The **Chromatic Scale** includes every single available note (including Sharps/Flats). There are exactly **12 steps** in Western music before you hit the same note again.</p>
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; margin: 15px 0; text-align: center; border: 1px solid #ddd; font-family: monospace; font-size: 0.85rem; line-height: 1.6;">
-                    <strong>C</strong> → C# → <strong>D</strong> → D# → <strong>E</strong> → <strong>F</strong> → F# → <strong>G</strong> → G# → <strong>A</strong> → A# → <strong>B</strong> → (<strong>C</strong>)
-                </div>
-                <div id="theory-fretboard-chromatic" class="hack-fretboard"></div>
-            </div>
-
-            <!-- 3. Piano Comparison -->
-            <div class="hack-card">
-                <h3>3. The Piano Mirror</h3>
-                <p>On a piano, the Major Scale notes are the **White Keys**, and the Sharps are the **Black Keys**. This is the exact same logic used on your guitar strings.</p>
+                <h3>1. The DNA of Music</h3>
+                <p>The layout of Western music is easiest to see on a piano. White keys are the "Natural" notes (Major Scale), and black keys are the "Sharps" (#).</p>
+                
                 <div id="piano-container" style="width: 100%; margin: 20px 0; padding: 10px; background: #eee; border-radius: 12px; overflow-x: auto;">
                     <!-- SVG Piano injected by JS -->
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
-                    Pro Tip: Notice there is no black key (sharp) between E/F and B/C. That's why those frets are right next to each other!
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+                    <div style="background: var(--primary-soft); padding: 12px; border-radius: 12px; border: 1px solid var(--primary);">
+                        <strong style="color: var(--primary); font-size: 0.8rem; text-transform: uppercase;">C Major Scale</strong><br>
+                        <span style="font-weight: 800; font-size: 1.1rem; letter-spacing: 0.05em;">C D E F G A B</span>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 12px; border: 1px solid #ddd;">
+                        <strong style="color: #717171; font-size: 0.8rem; text-transform: uppercase;">12 Chromatic Steps</strong><br>
+                        <span style="font-family: monospace; font-size: 0.75rem;">C C# D D# E F F# G G# A A# B</span>
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 12px; border-left: 4px solid var(--primary);">
+                    <p style="margin: 0; font-size: 0.9rem; line-height: 1.5;">
+                        <strong>The Guitar Connection:</strong> Every fret is 1 step (1 key). Notice there is no black key between <strong>E/F</strong> and <strong>B/C</strong>. On your guitar, that means those notes are <strong>one fret apart</strong>, while others are two!
+                    </p>
                 </div>
             </div>
 
-            <!-- 4. The B-String Roadmap -->
+            <!-- 2. Mapping the B-String -->
             <div class="hack-card">
-                <h3>4. Mapping the B-String</h3>
+                <h3>2. Mapping the B-String</h3>
                 <p>Let's look at one string. The **B-String** is perfect for learning because it starts on a natural note. Tap to toggle between the Major (7 notes) and Chromatic (12 notes) maps.</p>
                 <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                     <button class="filter-btn active" id="btn-b-major">C Major</button>
@@ -751,10 +745,10 @@
                 <div id="theory-fretboard-bstring" class="hack-fretboard"></div>
             </div>
 
-            <!-- 5. Dynamic Explorer -->
+            <!-- 3. Dynamic Explorer -->
             <div class="hack-card">
-                <h3>5. The Universal DNA Explorer</h3>
-                <p>Every note on the neck follows these same rules. **Tap any fret** to see the Major Scale (Blue) and Chromatic Scale (Grey) built from that specific starting point.</p>
+                <h3>3. The Universal DNA Explorer</h3>
+                <p>Every note on the neck follows these same rules. **Tap any fret** to see the Major Scale (Green) and Chromatic Scale (Grey) built from that specific starting point.</p>
                 <div id="theory-fretboard-explorer" class="hack-fretboard"></div>
                 <div id="explorer-info" style="margin-top: 10px; padding: 12px; background: var(--primary-soft); border-radius: 12px; font-size: 0.9rem; text-align: center; border: 1px solid var(--primary); display: none;">
                     <!-- Data injected by JS -->
