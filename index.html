@@ -1405,51 +1405,16 @@
             sideNav.classList.remove('open');
         });
 
-        let theoryMajorUI;
-        let theoryChromaticUI;
         let theoryBStringUI;
         let theoryExplorerUI;
         let theoryOctopusUI;
         let theoryAnchorsUI;
-        let theoryLadderUI;
 
         function initTheory() {
-            // 1. C Major Foundation
-            if (!theoryMajorUI) {
-                theoryMajorUI = new FretboardUI('theory-fretboard-major', state, (s, f) => {
-                    guitar.play(s, f);
-                }, true);
-                const scale = getMajorScale('C');
-                const vals = scale.map(n => NOTE_VALUES[n]);
-                const hits = [];
-                for(let fret=0; fret<=22; fret++) {
-                    const note = getNoteAt(STRINGS[1].open, fret); // Show on B string
-                    if(vals.includes(NOTE_VALUES[note])) {
-                        hits.push({ stringIdx: 1, fret, color: note === 'C' ? 'var(--primary)' : 'var(--accent-green)', label: note });
-                    }
-                }
-                theoryMajorUI.setHighlights(hits);
-            }
-            theoryMajorUI.render();
-
-            // 2. Chromatic Loop
-            if (!theoryChromaticUI) {
-                theoryChromaticUI = new FretboardUI('theory-fretboard-chromatic', state, (s, f) => {
-                    guitar.play(s, f);
-                }, true);
-                const hits = [];
-                for(let fret=0; fret<=12; fret++) {
-                    const note = getNoteAt(STRINGS[1].open, fret);
-                    hits.push({ stringIdx: 1, fret, color: 'var(--primary)', label: note });
-                }
-                theoryChromaticUI.setHighlights(hits);
-            }
-            theoryChromaticUI.render();
-
-            // 3. Piano Mirror
+            // 1. Piano Mirror (SVG Only)
             renderPiano();
 
-            // 4. B-String Roadmap
+            // 2. B-String Roadmap
             if (!theoryBStringUI) {
                 theoryBStringUI = new FretboardUI('theory-fretboard-bstring', state, (s, f) => {
                     guitar.play(s, f);
@@ -1480,7 +1445,7 @@
             }
             theoryBStringUI.render();
 
-            // 5. Dynamic Explorer
+            // 3. Dynamic Explorer
             if (!theoryExplorerUI) {
                 theoryExplorerUI = new FretboardUI('theory-fretboard-explorer', state, (s, f) => {
                     guitar.play(s, f);
@@ -1508,7 +1473,7 @@
             }
             theoryExplorerUI.render();
 
-            // 1. Initialize Octopus Hack
+            // Legacy Hacks (GPS & Octopus)
             if (!theoryOctopusUI) {
                 theoryOctopusUI = new FretboardUI('theory-fretboard-octopus', state, (s, f) => {
                     guitar.play(s, f);
