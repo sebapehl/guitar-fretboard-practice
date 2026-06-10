@@ -25,16 +25,28 @@ export class FretboardUI {
         // Draw background wood-ish soft color
         html += `<rect x="${this.margin.left}" y="${this.margin.top}" width="${(numFrets) * this.fretWidth}" height="${5 * this.stringHeight}" fill="#FAF3E0" rx="4" pointer-events="none" />`;
 
+        // Draw Lock Overlay for non-pro users (Frets 6-22)
+        if (!this.game.isPro) {
+            const lockStart = this.margin.left + 6 * this.fretWidth;
+            const lockWidth = (numFrets - 5) * this.fretWidth;
+            html += `<rect x="${lockStart}" y="${this.margin.top}" width="${lockWidth}" height="${5 * this.stringHeight}" fill="rgba(0,0,0,0.03)" rx="4" pointer-events="none" />`;
+            
+            // Add a subtle "Pro" label or lock icon placeholder
+            html += `<text x="${lockStart + 20}" y="${this.margin.top + 20}" font-size="10" font-weight="800" fill="#bbb" pointer-events="none">PRO ONLY</text>`;
+        }
+
         // Draw frets
         for (let i = 0; i <= numFrets; i++) {
             const x = this.margin.left + i * this.fretWidth;
             const isNut = (i + minFret) === 0;
+            const isLocked = !this.game.isPro && i > 5;
+            
             html += `<line x1="${x}" y1="${this.margin.top}" x2="${x}" y2="${height - this.margin.bottom}" 
-                      stroke="${isNut ? '#484848' : '#D1D1D1'}" stroke-width="${isNut ? 6 : 3}" stroke-linecap="round" pointer-events="none" />`;
+                      stroke="${isNut ? '#484848' : (isLocked ? '#E8E8E8' : '#D1D1D1')}" stroke-width="${isNut ? 6 : 3}" stroke-linecap="round" pointer-events="none" />`;
             
             // Fret numbers
             if (!isNut) {
-                html += `<text x="${x - this.fretWidth/2}" y="${height - 10}" font-size="12" font-weight="600" text-anchor="middle" fill="#717171" pointer-events="none">${i + minFret}</text>`;
+                html += `<text x="${x - this.fretWidth/2}" y="${height - 10}" font-size="12" font-weight="600" text-anchor="middle" fill="${isLocked ? '#ccc' : '#717171'}" pointer-events="none">${i + minFret}</text>`;
             } else {
                 html += `<text x="${x - 30}" y="${height - 10}" font-size="10" font-weight="800" text-anchor="middle" fill="#FF5A5F" pointer-events="none">OPEN</text>`;
             }

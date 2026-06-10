@@ -77,6 +77,7 @@ export class GameState {
         this.roundStartTime = null;
         this.status = 'idle'; // 'idle', 'playing', 'finished'
         this.currentChallenge = null;
+        this.isPro = false; // Monetization status
         
         // XP System
         this.xpEarned = 0;
@@ -102,10 +103,16 @@ export class GameState {
         // Positional Practice is now mandatory: pick a 5-fret neighborhood within the overall range
         const windowSize = 5;
         const [minLimit, maxLimit] = this.fretRange;
-        const rangeSpan = maxLimit - minLimit;
+        
+        // Monetization constraint: non-pro users can't go past fret 5
+        const maxAllowed = this.isPro ? maxLimit : Math.min(maxLimit, 5);
+        
+        const rangeSpan = maxAllowed - minLimit;
         const effectiveWindow = Math.min(windowSize, rangeSpan);
         
-        const anchor = Math.floor(Math.random() * (rangeSpan - effectiveWindow + 1)) + minLimit;
+        // If the range is too small (e.g. user restricted to frets 0-2), adjust
+        const safeSpan = Math.max(0, rangeSpan - effectiveWindow);
+        const anchor = Math.floor(Math.random() * (safeSpan + 1)) + minLimit;
         this.currentNeighborhood = [anchor, anchor + effectiveWindow];
 
         const lastNote = this.currentChallenge ? this.currentChallenge.correctNote : null;

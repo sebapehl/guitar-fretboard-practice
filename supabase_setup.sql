@@ -6,17 +6,43 @@ CREATE TABLE profiles (
     trophies INTEGER DEFAULT 0,
     streak_days INTEGER DEFAULT 0,
     total_xp INTEGER DEFAULT 0,
+    is_pro BOOLEAN DEFAULT FALSE,
     last_practice TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- Function to safely increment XP
+-- Function to safely increment XP and handle Daily Streaks
 CREATE OR REPLACE FUNCTION add_xp(xp_to_add INTEGER)
 RETURNS void AS $$
+DECLARE
+  current_streak INTEGER;
+  last_practiced DATE;
+  today DATE := CURRENT_DATE;
 BEGIN
+  -- Get current profile data
+  SELECT streak_days, last_practice::DATE INTO current_streak, last_practiced
+  FROM profiles
+  WHERE id = auth.uid();
+
+  -- Streak Logic:
+  -- 1. If never practiced, streak = 1
+  -- 2. If last practiced yesterday (today - 1), streak = streak + 1
+  -- 3. If last practiced today, streak stays the same
+  -- 4. If last practiced before yesterday, streak = 1
+  IF last_practiced IS NULL THEN
+    current_streak := 1;
+  ELSIF last_practiced = today THEN
+    -- Keep current streak
+  ELSIF last_practiced = today - 1 THEN
+    current_streak := current_streak + 1;
+  ELSE
+    current_streak := 1;
+  END IF;
+
   UPDATE profiles
   SET total_xp = total_xp + xp_to_add,
-      last_practice = NOW()
+      last_practice = NOW(),
+      streak_days = current_streak
   WHERE id = auth.uid();
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -704,10 +704,33 @@
 
         <div id="theory-view" style="display: none;">
             <h2 style="margin-bottom: 1.5rem;">Fretboard Theory</h2>
-            
+
+            <div class="hack-card">
+                <h3>🧭 The Foundation: 6 Ladders</h3>
+                <p>Think of your guitar as 6 identical ladders. Every fret is a step (a half-step). After 12 steps, you land on the exact same note, just an octave higher. The "mess" of the fretboard comes from the fact that each ladder starts at a different height (E, A, D, G, B, e).</p>
+                <div id="theory-fretboard-foundation" class="hack-fretboard"></div>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <div style="flex: 1; background: #f8f9fa; padding: 10px; border-radius: 12px; font-size: 0.8rem;">
+                        <strong>Vertical:</strong> Moving between strings is a shortcut to distant notes.
+                    </div>
+                    <div style="flex: 1; background: #f8f9fa; padding: 10px; border-radius: 12px; font-size: 0.8rem;">
+                        <strong>Horizontal:</strong> Every string follows the same 12-note loop forever.
+                    </div>
+                </div>
+            </div>
+
+            <div class="hack-card">
+                <h3>🎯 The Anchor Strings (E & A)</h3>
+                <p>Don't memorize 132 notes. Just learn the <strong>Low E</strong> and <strong>A</strong> strings. These are your "GPS" anchors. Tap a note on the bottom two strings to see how they unlock the rest of the neck.</p>
+                <div id="theory-fretboard-anchors" class="hack-fretboard"></div>
+                <div style="font-size: 0.85rem; color: var(--accent-green); font-weight: 600;">
+                    Pro Tip: 100% of standard Power Chords use these two strings as their root!
+                </div>
+            </div>
+
             <div class="hack-card">
                 <h3>🐙 The Octopus (Octaves)</h3>
-                <p>Find one note, find them all. Every note has "twins" (octaves) in predictable spots. Tap a fret to see the patterns:</p>
+                <p>Once you know your Anchor Strings, use "The Octopus" to find those same notes anywhere else. Every note has "twins" in predictable spots. Tap a fret to see the patterns:</p>
                 
                 <div id="theory-fretboard-octopus" class="hack-fretboard"></div>
                 
@@ -724,21 +747,33 @@
             </div>
 
             <div class="hack-card">
-                <h3>🎯 The Anchor Strings (E & A)</h3>
-                <p>Don't memorize 132 notes. Just learn the <strong>Low E</strong> and <strong>A</strong> strings. These are your "GPS" anchors. Tap a note on the bottom two strings to see how they unlock the rest of the neck.</p>
-                <div id="theory-fretboard-anchors" class="hack-fretboard"></div>
-                <div style="font-size: 0.85rem; color: var(--accent-green); font-weight: 600;">
-                    Pro Tip: 100% of standard Power Chords use these two strings as their root!
-                </div>
-            </div>
-
-            <div class="hack-card">
                 <h3>🪜 The Major Scale Map</h3>
                 <p>Every major scale follows a simple math formula: <strong>Whole-Whole-Half-Whole-Whole-Whole-Half</strong>. Tap any fret to see how that scale maps across the entire fretboard.</p>
                 <div id="theory-fretboard-ladder" class="hack-fretboard"></div>
                 <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600;">
                     Tip: The scale pattern repeats every 12 frets and forms the basis for all chords and solos.
                 </div>
+            </div>
+
+            <div style="margin-top: 40px; padding: 30px; background: #fff; border: 2px solid var(--primary-soft); border-radius: 24px; text-align: center; box-shadow: var(--shadow);">
+                <div style="font-size: 2.5rem; margin-bottom: 10px;">📚</div>
+                <h3 style="font-weight: 800; margin-bottom: 10px;">Take Your Theory Further</h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;">
+                    The physical companion to your digital practice. Get high-resolution posters and the "Fretboard Mastery" ebook.
+                </p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 16px; border: 1px solid #eee;">
+                        <div style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--primary);">Digital</div>
+                        <div style="font-weight: 800; font-size: 1.1rem;">E-Book Bundle</div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem;">$9.99</div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 16px; border: 1px solid #eee;">
+                        <div style="font-weight: 800; font-size: 0.8rem; text-transform: uppercase; color: var(--accent-green);">Physical</div>
+                        <div style="font-weight: 800; font-size: 1.1rem;">Theory Poster</div>
+                        <div style="color: var(--text-muted); font-size: 0.8rem;">$4.99</div>
+                    </div>
+                </div>
+                <button class="btn" onclick="window.open('https://shop.fretboardbattle.com', '_blank')">Visit the Store</button>
             </div>
         </div>
 
@@ -933,6 +968,24 @@
         </div>
     </div>
 
+    <div class="game-over-overlay" id="upgrade-modal">
+        <div style="background: white; padding: 40px 30px; border-radius: 24px; max-width: 400px; width: 90%; color: var(--text); text-align: center; box-shadow: var(--shadow);">
+            <div style="font-size: 3.5rem; margin-bottom: 15px;">🎸</div>
+            <h2 style="font-weight: 800; margin-bottom: 10px; font-size: 1.8rem; line-height: 1.1;">Master the Whole Neck</h2>
+            <p style="color: var(--text-muted); margin-bottom: 25px; line-height: 1.5; font-size: 1rem;">
+                Unlock frets 6-22, Positional Practice, and all Theory Hacks with a one-time Lifetime Pass.
+            </p>
+            <div style="background: var(--primary-soft); padding: 20px; border-radius: 16px; margin-bottom: 25px;">
+                <div style="font-size: 0.8rem; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Lifetime Access</div>
+                <div style="font-size: 2.2rem; font-weight: 800; color: var(--primary);">$4.99</div>
+            </div>
+            <div class="controls" style="display: flex; flex-direction: column; gap: 10px; max-width: 100%;">
+                <button class="btn" id="upgrade-buy-btn" style="width: 100%;">Unlock Forever</button>
+                <button class="btn btn-secondary" id="upgrade-close-btn" style="width: 100%;">Maybe Later</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { GameState, NOTES, NOTE_VALUES, STRINGS, getNoteAt, getMajorScale, getNoteInfo } from './fretboard.js';
         import { FretboardUI } from './ui.js';
@@ -1117,6 +1170,25 @@
             updatePBDisplay();
             showView('landing');
 
+            // Upgrade Modal Listeners
+            const upgradeModal = document.getElementById('upgrade-modal');
+            const upgradeCloseBtn = document.getElementById('upgrade-close-btn');
+            const upgradeBuyBtn = document.getElementById('upgrade-buy-btn');
+
+            window.addEventListener('show-upgrade-modal', () => {
+                upgradeModal.style.display = 'flex';
+            });
+
+            upgradeCloseBtn.addEventListener('click', () => {
+                upgradeModal.style.display = 'none';
+            });
+
+            upgradeBuyBtn.addEventListener('click', () => {
+                // In a real app, this would redirect to Stripe Checkout
+                window.open('https://buy.stripe.com/test_fretboard_mastery', '_blank');
+                upgradeModal.style.display = 'none';
+            });
+
             // Check if we are in a recovery flow (URL contains type=recovery)
             if (window.location.hash.includes('type=recovery')) {
                 logDebug('Recovery link detected');
@@ -1196,12 +1268,12 @@
 
         function showView(viewName) {
             // Reset fret range to standard 0-12 on every view change
-            state.fretRange = [0, 12];
+            state.fretRange = state.isPro ? [0, 12] : [0, 5];
             const minSlider = document.getElementById('setting-fret-min');
             const maxSlider = document.getElementById('setting-fret-max');
             if (minSlider && maxSlider) {
-                minSlider.value = 0;
-                maxSlider.value = 12;
+                minSlider.value = state.fretRange[0];
+                maxSlider.value = state.fretRange[1];
                 updateFretRange();
             }
 
@@ -1256,11 +1328,34 @@
             sideNav.classList.remove('open');
         });
 
+        let theoryFoundationUI;
         let theoryOctopusUI;
         let theoryAnchorsUI;
         let theoryLadderUI;
 
         function initTheory() {
+            // 0. Initialize Foundation Hack
+            if (!theoryFoundationUI) {
+                theoryFoundationUI = new FretboardUI('theory-fretboard-foundation', state, (s, f) => {
+                    guitar.play(s, f);
+                    const noteName = getNoteAt(STRINGS[s].open, f);
+                    const positions = [];
+                    // Highlight the current string ladder logic
+                    for (let fret = 0; fret <= 22; fret++) {
+                        if (getNoteAt(STRINGS[s].open, fret) === noteName) {
+                            positions.push({
+                                stringIdx: s,
+                                fret,
+                                color: fret === f ? 'var(--primary)' : 'var(--accent-green)',
+                                label: noteName
+                            });
+                        }
+                    }
+                    theoryFoundationUI.setHighlights(positions);
+                });
+            }
+            theoryFoundationUI.render();
+
             // 1. Initialize Octopus Hack
             if (!theoryOctopusUI) {
                 theoryOctopusUI = new FretboardUI('theory-fretboard-octopus', state, (s, f) => {
@@ -1506,16 +1601,26 @@
             try {
                 const { data, error } = await withTimeout(supabase
                     .from('profiles')
-                    .select('total_xp, username, streak_days')
+                    .select('total_xp, username, streak_days, is_pro')
                     .eq('id', currentUser.id)
                     .single());
-                
+
                 if (error) throw error;
-                
+
                 const xp = data.total_xp || 0;
                 const username = data.username || 'User';
                 const streak = data.streak_days || 0;
+                const isPro = data.is_pro || false;
+
+                state.isPro = isPro;
+                if (ui) ui.render(); // Refresh UI to reflect pro status
                 
+                // Update sliders if they exist
+                const minSlider = document.getElementById('setting-fret-min');
+                if (minSlider) {
+                    updateFretRange();
+                }
+
                 const level = Math.floor(Math.sqrt(xp / 50)) + 1;
                 
                 // Level Up celebration!
@@ -2198,6 +2303,15 @@
             let min = parseInt(minSlider.value);
             let max = parseInt(maxSlider.value);
             
+            // Monetization check
+            if (!state.isPro && (min > 5 || max > 5)) {
+                if (min > 5) minSlider.value = 5;
+                if (max > 5) maxSlider.value = 5;
+                min = parseInt(minSlider.value);
+                max = parseInt(maxSlider.value);
+                window.dispatchEvent(new CustomEvent('show-upgrade-modal'));
+            }
+
             if (min > max) {
                 if (e && e.target.id === 'setting-fret-min') {
                     maxSlider.value = min;
@@ -2257,6 +2371,44 @@
             // We've used the prompt, and can't use it again, throw it away
             deferredPrompt = null;
             // Hide the install button
+            installBtn.style.display = 'none';
+            sideNav.classList.remove('open');
+        });
+
+        window.addEventListener('appinstalled', (evt) => {
+            logDebug('App was installed');
+            installBtn.style.display = 'none';
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => logDebug('SW registered'))
+                    .catch(err => logDebug('SW failed', err));
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
+           logDebug('App was installed');
+            installBtn.style.display = 'none';
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => logDebug('SW registered'))
+                    .catch(err => logDebug('SW failed', err));
+            });
+        }
+
+        init();
+    </script>
+</body>
+</html>
+on
             installBtn.style.display = 'none';
             sideNav.classList.remove('open');
         });
