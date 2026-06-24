@@ -147,6 +147,21 @@ export class FretboardUI {
         });
     }
 
+    showFeedback(stringIdx, fret, isCorrect, label = null) {
+        const h = {
+            stringIdx,
+            fret,
+            color: isCorrect ? '#00A699' : '#FF5A5F', // Accent Green or Airbnb Coral
+            label
+        };
+        this.highlights.push(h);
+        this.render();
+        setTimeout(() => {
+            this.highlights = this.highlights.filter(item => item !== h);
+            this.render();
+        }, 200);
+    }
+
     setHighlights(highlights) {
         this.highlights = highlights;
         this.render();
