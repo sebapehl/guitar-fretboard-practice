@@ -1294,6 +1294,7 @@
 
                 if (!currentUser) {
                     logDebug('Not logged in');
+                    state.isPro = false;
                 }
                 updateAuthUI();
             });
@@ -2411,17 +2412,28 @@
         const sliderTrack = document.getElementById('slider-track');
 
         function updateFretRange(e) {
+            // Monetization check for non-pro users
+            if (!state.isPro) {
+                let showModal = false;
+                
+                // Only show upgrade modal if change was triggered by user explicitly sliding to > 5
+                if (e && e.target) {
+                    const val = parseInt(e.target.value);
+                    if (val > 5) {
+                        showModal = true;
+                    }
+                }
+                
+                if (parseInt(minSlider.value) > 5) minSlider.value = 5;
+                if (parseInt(maxSlider.value) > 5) maxSlider.value = 5;
+                
+                if (showModal) {
+                    window.dispatchEvent(new CustomEvent('show-upgrade-modal'));
+                }
+            }
+
             let min = parseInt(minSlider.value);
             let max = parseInt(maxSlider.value);
-            
-            // Monetization check
-            if (!state.isPro && (min > 5 || max > 5)) {
-                if (min > 5) minSlider.value = 5;
-                if (max > 5) maxSlider.value = 5;
-                min = parseInt(minSlider.value);
-                max = parseInt(maxSlider.value);
-                window.dispatchEvent(new CustomEvent('show-upgrade-modal'));
-            }
 
             if (min > max) {
                 if (e && e.target.id === 'setting-fret-min') {
