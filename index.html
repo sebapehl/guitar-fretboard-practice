@@ -1846,6 +1846,18 @@
                 if (xpBar) xpBar.style.width = `${progress}%`;
             } catch (err) {
                 logDebug(`Profile fetch failed: ${err.message}`);
+                // Fallback to default (Free Plan) UI if query fails or profile is missing
+                const subscriptionBadge = document.getElementById('user-subscription-badge');
+                const premiumPromoCard = document.getElementById('premium-promo-card');
+                if (subscriptionBadge) {
+                    subscriptionBadge.innerText = 'Free Plan';
+                    subscriptionBadge.style.background = 'rgba(255, 255, 255, 0.2)';
+                    subscriptionBadge.style.color = 'white';
+                    subscriptionBadge.style.boxShadow = 'none';
+                }
+                if (premiumPromoCard) {
+                    premiumPromoCard.style.display = 'block';
+                }
             }
         }
 
