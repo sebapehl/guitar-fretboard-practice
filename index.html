@@ -938,6 +938,9 @@
                     <div>
                         <div style="font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.1em;">Level</div>
                         <div style="font-size: 2.5rem; font-weight: 800; line-height: 1;" id="user-level-display">1</div>
+                        <div id="user-subscription-badge" style="display: inline-block; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; padding: 3px 8px; border-radius: 8px; margin-top: 8px; background: rgba(255, 255, 255, 0.2); color: white;">
+                            Free Plan
+                        </div>
                     </div>
                     <div style="text-align: right;">
                         <div style="font-size: 0.8rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.1em;">Combatant</div>
@@ -972,6 +975,17 @@
                 </div>
             </div>
             
+            <div id="premium-promo-card" style="background: linear-gradient(135deg, #FFD700, #FFA500); color: #2D333A; padding: 20px; border-radius: 20px; text-align: left; margin-bottom: 24px; display: none; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.2); position: relative; overflow: hidden;">
+                <div style="font-size: 1.5rem; position: absolute; right: 15px; top: 15px; opacity: 0.2;">👑</div>
+                <h4 style="margin: 0 0 6px 0; font-size: 1.1rem; font-weight: 800; letter-spacing: -0.02em;">Unlock Premium Mastery</h4>
+                <p style="margin: 0 0 16px 0; font-size: 0.85rem; line-height: 1.4; color: rgba(45, 51, 58, 0.8);">
+                    Get unlimited access to all 12 frets, advanced positional practice, and custom theory drills.
+                </p>
+                <button class="btn" id="profile-go-premium-btn" style="background: #2D333A; color: white; border: none; font-size: 0.85rem; padding: 10px 16px; border-radius: 12px; font-weight: 700; width: auto; cursor: pointer; transition: transform 0.2s;">
+                    Upgrade to Premium
+                </button>
+            </div>
+
             <div class="controls" style="margin-bottom: 30px; gap: 12px;">
                 <button class="btn btn-secondary" id="share-profile-btn" style="flex: 1; padding: 12px;">📤 Share Rank</button>
             </div>
@@ -1254,11 +1268,38 @@
                 upgradeModal.style.display = 'none';
             });
 
-            upgradeBuyBtn.addEventListener('click', () => {
+            upgradeBuyBtn.addEventListener('click', async () => {
+                try {
+                    if (currentUser) {
+                        const { error } = await supabase
+                            .from('profiles')
+                            .update({ is_pro: true })
+                            .eq('id', currentUser.id);
+                        if (error) throw error;
+                        
+                        state.isPro = true;
+                        await fetchProfileData();
+                        alert('Upgrade successful! Fretboard limits unlocked.');
+                    } else {
+                        state.isPro = true;
+                        alert('Upgraded local session to Premium!');
+                    }
+                } catch (err) {
+                    console.error('Failed to update premium status:', err);
+                    state.isPro = true;
+                    alert('Upgraded local session to Premium!');
+                }
                 // In a real app, this would redirect to Stripe Checkout
                 window.open('https://buy.stripe.com/test_fretboard_mastery', '_blank');
                 upgradeModal.style.display = 'none';
             });
+
+            const profileGoPremiumBtn = document.getElementById('profile-go-premium-btn');
+            if (profileGoPremiumBtn) {
+                profileGoPremiumBtn.addEventListener('click', () => {
+                    window.dispatchEvent(new CustomEvent('show-upgrade-modal'));
+                });
+            }
 
             // Check if we are in a recovery flow (URL contains type=recovery)
             if (window.location.hash.includes('type=recovery')) {
@@ -1335,6 +1376,18 @@
                 fetchProfileData();
             } else {
                 authMenu.innerText = 'Login / Sign Up';
+                // Reset subscription UI elements on logout
+                const subscriptionBadge = document.getElementById('user-subscription-badge');
+                const premiumPromoCard = document.getElementById('premium-promo-card');
+                if (subscriptionBadge) {
+                    subscriptionBadge.innerText = 'Free Plan';
+                    subscriptionBadge.style.background = 'rgba(255, 255, 255, 0.2)';
+                    subscriptionBadge.style.color = 'white';
+                    subscriptionBadge.style.boxShadow = 'none';
+                }
+                if (premiumPromoCard) {
+                    premiumPromoCard.style.display = 'none';
+                }
             }
         }
 
@@ -1726,6 +1779,31 @@
 
                 state.isPro = isPro;
                 if (ui) ui.render(); // Refresh UI to reflect pro status
+
+                const subscriptionBadge = document.getElementById('user-subscription-badge');
+                const premiumPromoCard = document.getElementById('premium-promo-card');
+                
+                if (isPro) {
+                    if (subscriptionBadge) {
+                        subscriptionBadge.innerText = '👑 Premium';
+                        subscriptionBadge.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
+                        subscriptionBadge.style.color = '#2D333A';
+                        subscriptionBadge.style.boxShadow = '0 2px 8px rgba(255,215,0,0.4)';
+                    }
+                    if (premiumPromoCard) {
+                        premiumPromoCard.style.display = 'none';
+                    }
+                } else {
+                    if (subscriptionBadge) {
+                        subscriptionBadge.innerText = 'Free Plan';
+                        subscriptionBadge.style.background = 'rgba(255, 255, 255, 0.2)';
+                        subscriptionBadge.style.color = 'white';
+                        subscriptionBadge.style.boxShadow = 'none';
+                    }
+                    if (premiumPromoCard) {
+                        premiumPromoCard.style.display = 'block';
+                    }
+                }
                 
                 // Update sliders if they exist
                 const minSlider = document.getElementById('setting-fret-min');
