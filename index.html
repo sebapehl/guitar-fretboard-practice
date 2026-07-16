@@ -2506,18 +2506,17 @@
             if (!state.isPro) {
                 let showModal = false;
                 
-                // Only show upgrade modal if change was triggered by user explicitly sliding to > 5
-                if (e && e.target) {
-                    const val = parseInt(e.target.value);
-                    if (val > 5) {
-                        showModal = true;
-                    }
+                if (parseInt(minSlider.value) > 5) {
+                    minSlider.value = 5;
+                    showModal = true;
+                }
+                if (parseInt(maxSlider.value) > 5) {
+                    maxSlider.value = 5;
+                    showModal = true;
                 }
                 
-                if (parseInt(minSlider.value) > 5) minSlider.value = 5;
-                if (parseInt(maxSlider.value) > 5) maxSlider.value = 5;
-                
-                if (showModal) {
+                // Only show upgrade modal if the change was triggered by the user explicitly trying to drag/input above 5
+                if (showModal && e) {
                     window.dispatchEvent(new CustomEvent('show-upgrade-modal'));
                 }
             }
