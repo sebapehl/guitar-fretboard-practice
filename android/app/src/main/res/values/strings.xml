@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FretboardBattle</string>
+    <string name="title_activity_main">FretboardBattle</string>
+    <string name="package_name">com.fretboardbattle.app</string>
+    <string name="custom_url_scheme">com.fretboardbattle.app</string>
+</resources>

@@ -4,12 +4,32 @@
   "description": "Gamified guitar fretboard practice app.",
   "type": "module",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "build": "mkdir -p www && cp index.html fretboard.js ui.js supabase.js manifest.json icon.svg sw.js www/",
+    "cap:sync": "npm run build && node node_modules/@capacitor/cli/bin/capacitor sync android"
   },
   "devDependencies": {
     "vitest": "^1.6.1"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
     "@supabase/supabase-js": "^2.105.4"
-  }
+  },
+  "main": "fretboard.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sebapehl/guitar-fretboard-practice.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sebapehl/guitar-fretboard-practice/issues"
+  },
+  "homepage": "https://github.com/sebapehl/guitar-fretboard-practice#readme"
 }
